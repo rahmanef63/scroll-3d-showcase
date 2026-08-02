@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+*.glb    binary
+*.woff2  binary
+*.ico    binary
+*.png    binary
+*.jpg    binary
+*.webp   binary
+
+package-lock.json linguist-generated=true -diff

@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Theme tokens — single source of truth.
+
+   The --showcase-* group is read twice: by Tailwind utilities through @theme
+   below, and at runtime by the slice's theme-colors.ts, which feeds the same
+   values into the WebGL lighting rig. Change a colour here and both follow.
+
+   TODO(rr): confirm — in a project with the tones SSOT wired up, the semantic
+   entries here should resolve through it instead of being declared per slice.
+--------------------------------------------------------------------------- */
+:root {
+  /* shadcn base — dark by default, this product has no light mode */
+  --background: #04060c;
+  --foreground: #e8f4ff;
+  --card: #080d18;
+  --card-foreground: #e8f4ff;
+  --popover: #080d18;
+  --popover-foreground: #e8f4ff;
+  --primary: #4fe3ff;
+  --primary-foreground: #04060c;
+  --secondary: #14203a;
+  --secondary-foreground: #e8f4ff;
+  --muted: #14203a;
+  --muted-foreground: #8296ae;
+  --accent: #14203a;
+  --accent-foreground: #4fe3ff;
+  --destructive: #ff3d9a;
+  --border: rgb(79 227 255 / 0.22);
+  --input: rgb(79 227 255 / 0.22);
+  --ring: rgb(79 227 255 / 0.5);
+  --radius: 0.25rem;
+
+  /* showcase slice */
+  --showcase-bg: #04060c;
+  --showcase-fg: #e8f4ff;
+  --showcase-muted: #8296ae;
+  --showcase-primary: #4fe3ff;
+  --showcase-accent: #ff3d9a;
+  --showcase-warn: #ffcf5c;
+  --showcase-line: rgb(79 227 255 / 0.22);
+  --showcase-vignette: rgb(2 4 9 / 0.75);
+
+  /* lighting rig — consumed by three.js, not by CSS */
+  --showcase-key: #ffffff;
+  --showcase-fill: #88b6ff;
+  --showcase-ambient: #2b3c5a;
+  --showcase-grid: #4fe3ff;
+  --showcase-grid-subdued: #18304a;
+
+  /* layout rhythm shared by the HUD and the copy panels */
+  --showcase-pad: clamp(14px, 3.2vw, 40px);
+  --showcase-inset: 8px;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --showcase-inset: clamp(30px, 5vw, 58px);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-showcase-bg: var(--showcase-bg);
+  --color-showcase-fg: var(--showcase-fg);
+  --color-showcase-muted: var(--showcase-muted);
+  --color-showcase-primary: var(--showcase-primary);
+  --color-showcase-accent: var(--showcase-accent);
+  --color-showcase-warn: var(--showcase-warn);
+  --color-showcase-line: var(--showcase-line);
+
+  --font-display: var(--font-chakra-petch), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-display antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background: var(--showcase-primary);
+    color: var(--showcase-bg);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--showcase-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(79 227 255 / 0.35);
+  }
+}
+
+/* HUD motion. Every consumer of these respects motion-reduce at the call site. */
+@keyframes showcase-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes showcase-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Indeterminate progress. Nothing behind these bars reports a fraction — a
+   server render, a Convex round-trip — so the bar sweeps instead of filling. */
+@keyframes showcase-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(520%);
+  }
+}
+
+@keyframes showcase-wheel {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}

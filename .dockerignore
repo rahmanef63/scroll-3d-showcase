@@ -1,0 +1,8 @@
+.git
+node_modules
+.next
+out
+legacy-static
+coverage
+*.tar.gz
+*.zip

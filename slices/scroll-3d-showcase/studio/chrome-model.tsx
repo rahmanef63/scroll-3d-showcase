@@ -1,0 +1,94 @@
+'use client';
+
+import { cn } from '@/lib/utils';
+import { Chip, INPUT } from './studio-ui';
+import type { ShowcaseModel } from './types';
+
+export interface ChromeModelProps {
+  models: readonly ShowcaseModel[];
+  modelId: string;
+  busy: boolean;
+  /** The selected model is the one the public page renders. */
+  isLive: boolean;
+  /** The selected model's file is gone from the host's scan. */
+  missing: boolean;
+  onSelectModel: (id: string) => void;
+  onGoLive?: () => void;
+  onForget?: () => void;
+}
+
+/** `bytes === 0` is the fallback model's placeholder; printing "0KB" reads as an error. */
+const modelLabel = (entry: ShowcaseModel) => {
+  if (entry.missing) return `${entry.name} · MISSING`;
+  return entry.bytes > 0 ? `${entry.name} · ${(entry.bytes / 1048576).toFixed(1)}MB` : entry.name;
+};
+
+/**
+ * Which model, and whether it is the one the site is showing.
+ *
+ * One group because the three read as one sentence: this model, is it live, and
+ * (only when broken) get rid of it.
+ */
+export function ChromeModel({
+  models,
+  modelId,
+  busy,
+  isLive,
+  missing,
+  onSelectModel,
+  onGoLive,
+  onForget,
+}: ChromeModelProps) {
+  return (
+    <>
+      <select
+    value={modelId}
+    onChange={(event) => onSelectModel(event.target.value)}
+    aria-label="Model"
+    className={cn('max-w-24 shrink-0 lg:max-w-52', INPUT)}
+  >
+    {models.length === 0 && <option value="">— NO MODELS — PRESS SYNC</option>}
+    {models.map((entry) => (
+      <option key={entry.id} value={entry.id}>
+        {modelLabel(entry)}
+      </option>
+    ))}
+  </select>
+
+  {/* Sits beside the picker because it is a statement about that model, not
+      an action on the draft — and disabled when it already holds, so the
+      chip doubles as the answer to "which one is the site showing?". */}
+  {onGoLive ? (
+    <Chip
+      // Convex refuses a missing model too; disabling here just means the
+      // answer arrives before the round-trip instead of after it.
+      disabled={busy || isLive || missing}
+      active={isLive}
+      onClick={onGoLive}
+      title={
+        missing
+          ? 'This file is gone from public/ — it cannot be published'
+          : isLive
+            ? 'This model is on the public page'
+            : 'Put this model on the public page'
+      }
+    >
+      {missing ? 'NO FILE' : isLive ? 'LIVE' : 'GO LIVE'}
+    </Chip>
+  ) : null}
+
+  {/* Costs nothing in the normal case: a row is only forgettable once its
+      file is already gone, so this is absent on every healthy model. */}
+  {missing && onForget ? (
+    <Chip
+      disabled={busy}
+      onClick={onForget}
+      title="Drop this row. Its saved preset stays, and comes back if the file does."
+      className="hover:text-showcase-accent"
+    >
+      FORGET
+    </Chip>
+  ) : null}
+    </>
+  );
+}
