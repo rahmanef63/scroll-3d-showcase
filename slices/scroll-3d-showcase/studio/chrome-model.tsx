@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { modelOption } from './model-label';
 import { Chip, INPUT } from './studio-ui';
 import type { ShowcaseModel } from './types';
 
@@ -18,13 +19,6 @@ export interface ChromeModelProps {
   onGoLive?: () => void;
   onForget?: () => void;
 }
-
-/** `bytes === 0` is the fallback model's placeholder; printing "0KB" reads as an error. */
-const modelLabel = (entry: ShowcaseModel) => {
-  if (entry.missing) return `${entry.name} · MISSING`;
-  if (entry.uploaded) return `${entry.name} · ${(entry.bytes / 1048576).toFixed(1)}MB ↑`;
-  return entry.bytes > 0 ? `${entry.name} · ${(entry.bytes / 1048576).toFixed(1)}MB` : entry.name;
-};
 
 /**
  * Which model, and whether it is the one the site is showing.
@@ -54,7 +48,7 @@ export function ChromeModel({
     {models.length === 0 && <option value="">— NO MODELS — PRESS SYNC</option>}
     {models.map((entry) => (
       <option key={entry.id} value={entry.id}>
-        {modelLabel(entry)}
+        {modelOption(entry)}
       </option>
     ))}
   </select>

@@ -123,6 +123,18 @@ What each toolbar action does:
 - **SYNC** scans `public/` for `.glb`/`.gltf`, gives each new file an id derived
   from its path (`rahman-3d.glb` → `rahman-3d`) and registers it. Ids are assigned once
   and never reassigned, so a saved camera path stays attached to its model.
+- Every model row says where its bytes live — `PUBLIC/` for a file the scan
+  found, `CLOUD` for an upload — in the picker and again in the library, because
+  that word decides what can be done to it. A `PUBLIC/` row cannot be deleted
+  from the studio: the file is in the build, so the next SYNC would put the row
+  straight back.
+- **Replacing a model under the same filename** is the one case `+0 NEW` reads
+  like a failure. SYNC counts it separately (`+0 NEW / 1 REPLACED`), and the
+  file's byte count rides along on its URL (`/rahman-3d.glb?v=1838500`) —
+  `public/` paths are permanent and cached for an hour plus a week of
+  stale-while-revalidate, so without it every browser would go on serving the
+  geometry it already had. Press SYNC after the deploy that carries the new file,
+  or nothing downstream learns the size changed.
 - **UPLOAD** is the other way in, and the only one that does not need a git
   checkout: the file goes from the browser straight into the backend's storage,
   no rebuild and no deploy. See *Uploads* below for what it costs and what it

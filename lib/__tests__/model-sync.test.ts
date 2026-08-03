@@ -24,7 +24,7 @@ const handler = <A, R>(fn: unknown) =>
 
 const runSync = handler<SyncArgs, SyncResult>(sync);
 const runSetLive = handler<{ token: string; modelId: string }, null>(setLive);
-const runLive = handler<Record<string, never>, { id: string } | null>(live);
+const runLive = handler<Record<string, never>, { id: string; url: string } | null>(live);
 const runForget = handler<{ token: string; modelId: string }, null>(forget);
 
 const TOKEN = 'studio-secret';
@@ -139,7 +139,7 @@ describe('models.sync', () => {
     const db = fakeDb();
 
     const result = await call(db, [file('hitman.glb'), file('models/car.glb')]);
-    expect(result).toEqual({ added: 2, total: 2, missing: 0 });
+    expect(result).toEqual({ added: 2, updated: 0, total: 2, missing: 0 });
     expect(db.rows.map((row) => row.modelId)).toEqual(['hitman', 'models-car']);
     expect(db.rows.map((row) => row.url)).toEqual(['/hitman.glb', '/models/car.glb']);
   });
@@ -152,7 +152,7 @@ describe('models.sync', () => {
 
     const result = await call(db, [file('hitman.glb', { name: 'Hitman v2', bytes: 999 })]);
 
-    expect(result).toEqual({ added: 0, total: 1, missing: 0 });
+    expect(result).toEqual({ added: 0, updated: 1, total: 1, missing: 0 });
     expect(db.rows).toHaveLength(1);
     // Same row, same id — a saved preset stays attached to its model.
     expect(db.rows[0]._id).toBe(original._id);
@@ -167,7 +167,7 @@ describe('models.sync', () => {
 
     const result = await call(db, [file('hitman.glb')]);
     // Kept, so the id is never handed to a different file and the preset lives.
-    expect(result).toEqual({ added: 0, total: 2, missing: 1 });
+    expect(result).toEqual({ added: 0, updated: 0, total: 2, missing: 1 });
     expect(db.rows.map((row) => row.modelId)).toEqual(['hitman', 'models-car']);
     expect(db.rows.map((row) => Boolean(row.missing))).toEqual([false, true]);
   });
@@ -179,7 +179,7 @@ describe('models.sync', () => {
     await call(db, [file('hitman.glb')]);
 
     const result = await call(db, [file('hitman.glb'), file('models/car.glb')]);
-    expect(result).toEqual({ added: 0, total: 2, missing: 0 });
+    expect(result).toEqual({ added: 0, updated: 0, total: 2, missing: 0 });
     expect(db.rows.every((row) => !row.missing)).toBe(true);
   });
 });
@@ -254,7 +254,7 @@ describe('publishing', () => {
 
     // Same path, so the same id — which is why the preset is left behind.
     const result = await call(db, [file('hitman.glb'), file('models/car.glb')]);
-    expect(result).toEqual({ added: 1, total: 2, missing: 0 });
+    expect(result).toEqual({ added: 1, updated: 0, total: 2, missing: 0 });
     expect(db.rows.map((row) => row.modelId)).toContain('models-car');
   });
 
@@ -361,5 +361,56 @@ describe('a model uploaded through the studio', () => {
       runForget({ db, storage } as unknown, { token: TOKEN, modelId: 'portrait' }),
     ).rejects.toThrow(/publish another model/i);
     expect(storage.deleted).toEqual([]);
+  });
+});
+
+/* ------------------------------------------------- a file swapped in place */
+
+describe('replacing a .glb under the same name', () => {
+  beforeEach(() => {
+    vi.stubEnv('STUDIO_TOKEN', TOKEN);
+  });
+
+  it('is reported, because `added` cannot see it', async () => {
+    // The whole reason this count exists: swap a model, press SYNC, and
+    // "+0 NEW" is true and reads exactly like the scan never found the file.
+    const db = fakeDb();
+    await call(db, [file('rahman-3d.glb', { bytes: 3524492 })]);
+
+    const result = await call(db, [file('rahman-3d.glb', { bytes: 1838500 })]);
+    expect(result).toMatchObject({ added: 0, updated: 1, total: 1 });
+  });
+
+  it('is not reported when nothing about the file changed', async () => {
+    const db = fakeDb();
+    await call(db, [file('rahman-3d.glb', { bytes: 3524492 })]);
+
+    expect(await call(db, [file('rahman-3d.glb', { bytes: 3524492 })])).toMatchObject({ updated: 0 });
+  });
+
+  it('hands the browser a URL it has not cached', async () => {
+    // public/ paths are permanent and cached for an hour plus a week of
+    // stale-while-revalidate, so without the size on the URL a swapped model
+    // keeps serving the geometry every visitor already has.
+    const db = fakeDb();
+    const storage = fakeStorage();
+    await call(db, [file('rahman-3d.glb', { bytes: 3524492 })]);
+    await publish(db, 'rahman-3d');
+
+    const before = await runLive({ db, storage } as unknown, {} as Record<string, never>);
+    await call(db, [file('rahman-3d.glb', { bytes: 1838500 })]);
+    const after = await runLive({ db, storage } as unknown, {} as Record<string, never>);
+
+    expect(before?.url).toBe('/rahman-3d.glb?v=3524492');
+    expect(after?.url).toBe('/rahman-3d.glb?v=1838500');
+  });
+
+  it('leaves an uploaded model\'s URL alone — a new upload is already a new id', async () => {
+    const db = fakeDb();
+    const storage = fakeStorage(new Set(['file-1']));
+    db.rows.push(uploaded('portrait', 'file-1', { live: true }));
+
+    const live = await runLive({ db, storage } as unknown, {} as Record<string, never>);
+    expect(live?.url).toBe('https://files.example/file-1');
   });
 });

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Chip, FOCUS, INPUT, LABEL, ROW, TAP, VALUE } from './studio-ui';
+import { modelSize, modelSource } from './model-label';
 import type { ShowcaseModel } from './types';
 import type { ModelActions } from './use-model-actions';
 
@@ -19,12 +20,6 @@ export interface LibraryRowProps {
   onSelect: () => void;
   onOpen: () => void;
 }
-
-const badge = (model: ShowcaseModel): string => {
-  if (model.missing) return 'MISSING';
-  if (model.bytes <= 0) return '';
-  return `${(model.bytes / 1048576).toFixed(1)}MB${model.uploaded ? ' ↑' : ''}`;
-};
 
 /**
  * One model, with everything that can be done to it.
@@ -50,6 +45,7 @@ export function LibraryRow({
   const [armed, setArmed] = useState(false);
 
   const { busy, publish, rename, remove } = actions;
+  const source = modelSource(model);
   const deletable = Boolean(model.missing || model.uploaded);
   const liveBlocked = isLive && !model.missing;
 
@@ -64,9 +60,23 @@ export function LibraryRow({
         <span className="min-w-0 truncate font-mono text-[11px] text-showcase-fg">
           {model.name}
         </span>
-        <span className={cn(VALUE, 'shrink-0')}>
-          {isLive ? 'LIVE · ' : ''}
-          {badge(model)}
+        <span className={cn(VALUE, 'flex shrink-0 items-center gap-1.5')}>
+          {isLive ? <span>LIVE</span> : null}
+          {modelSize(model) ? <span>{modelSize(model)}</span> : null}
+          {/* Where the bytes live, spelled out rather than iconified: it is the
+              difference between a row this studio can delete and one only a
+              commit can, and the DELETE chip below is missing on half of them
+              because of it. */}
+          <span
+            className={cn(
+              'border px-1 py-px text-[8px] tracking-[0.16em]',
+              source === 'CLOUD' && 'border-showcase-primary text-showcase-primary',
+              source === 'PUBLIC/' && 'border-showcase-line text-showcase-muted',
+              source === 'MISSING' && 'border-showcase-accent text-showcase-accent',
+            )}
+          >
+            {source}
+          </span>
         </span>
       </button>
 

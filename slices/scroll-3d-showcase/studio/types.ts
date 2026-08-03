@@ -54,8 +54,12 @@ export interface ShowcasePreset {
  * row on every render to serve the one a person clicked.
  */
 export interface ShowcaseStudioAdapter {
-  /** `missing` counts rows whose file the scan no longer finds. */
-  syncModels(): Promise<{ added: number; total: number; missing?: number }>;
+  /**
+   * `missing` counts rows whose file the scan no longer finds; `updated` counts
+   * files replaced under a name that already existed, which `added` cannot see
+   * and which is the one thing a person who just swapped a .glb wants told.
+   */
+  syncModels(): Promise<{ added: number; total: number; missing?: number; updated?: number }>;
   savePreset(modelId: string, preset: ShowcasePreset): Promise<void>;
   /**
    * Points the public page at this model. Optional: a host that only ever shows

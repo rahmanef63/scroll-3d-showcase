@@ -143,12 +143,19 @@ export const sync = mutation({
       }),
     ),
   },
-  returns: v.object({ added: v.number(), total: v.number(), missing: v.number() }),
+  returns: v.object({
+    added: v.number(),
+    /** Rows whose file changed size — a swapped model, which `added` cannot see. */
+    updated: v.number(),
+    total: v.number(),
+    missing: v.number(),
+  }),
   handler: async (ctx, args) => {
     requireStudioToken(args.token);
     requireAtMost(args.files.length, MAX_MODELS, 'model files');
 
     let added = 0;
+    let updated = 0;
     const seen = new Set<string>();
     for (const file of args.files) {
       const modelId = toModelId(file.path);
@@ -164,6 +171,11 @@ export const sync = mutation({
       // a round trip rather than a one-way door.
       const fields = { name: file.name, url: toUrl(file.path), bytes: file.bytes, missing: false };
       if (existing) {
+        // Same path, different bytes: someone replaced the file. Counted, because
+        // "+0 NEW" is a true and completely useless answer to "did my new model
+        // land?" — and because the URL carries the size, so this is the moment
+        // every browser stops being served the old geometry.
+        if (existing.bytes !== file.bytes || existing.url !== fields.url) updated += 1;
         await ctx.db.patch(existing._id, fields);
       } else {
         await ctx.db.insert('models', { modelId, ...fields });
@@ -182,6 +194,6 @@ export const sync = mutation({
       if (Boolean(row.missing) !== gone) await ctx.db.patch(row._id, { missing: gone });
     }
 
-    return { added, total: rows.length, missing };
+    return { added, updated, total: rows.length, missing };
   },
 });

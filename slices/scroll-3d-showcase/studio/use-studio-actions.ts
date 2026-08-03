@@ -135,11 +135,15 @@ export function useStudioActions({
       : undefined,
     sync: () =>
       void run('SYNCING', async () => {
-        const { added, total, missing = 0 } = await adapter.syncModels();
-        // Missing is called out rather than folded into the total: a row whose
-        // file vanished is the one state that silently breaks a publish.
+        const { added, total, missing = 0, updated = 0 } = await adapter.syncModels();
+        // Both exceptions are called out rather than folded into the total: a
+        // row whose file vanished is the one state that silently breaks a
+        // publish, and a replaced file is invisible in `added` — swap a .glb
+        // under the same name and "+0 NEW" is true, unhelpful, and reads exactly
+        // like the scan never saw it.
+        const swapped = updated > 0 ? ` / ${updated} REPLACED` : '';
         const gone = missing > 0 ? ` / ${missing} MISSING` : '';
-        return `+${added} NEW / ${total} TOTAL${gone}`;
+        return `+${added} NEW${swapped} / ${total} TOTAL${gone}`;
       }),
     save: () =>
       void run('SAVING', async () => {
