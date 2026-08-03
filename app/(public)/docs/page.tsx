@@ -1,21 +1,24 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { REPO_URL, STEPS } from './_steps';
+import { MODEL_STEPS, REPO_URL, STEPS, type DocStep } from './_steps';
 
 export const metadata: Metadata = {
   title: 'Guide — build one with your own model',
   description:
-    'Clone the repo, drop a .glb into public/, tune the camera in /studio and publish. Step by step.',
+    'Generate a 3D model from reference images, assemble it in Blender, then tune the camera in /studio and publish. Step by step.',
 };
 
 /**
  * Static from end to end — no data, no cache entry, nothing to invalidate. The
  * one page on this site that is a document rather than a scene, so it drops the
  * fixed overlays entirely and just scrolls.
+ *
+ * Two parts because they fail differently: the model is a pipeline of other
+ * people's tools and hand work, and the site is this repo.
  */
 export default function DocsPage() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-12 px-6 py-16 md:px-10">
+    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-14 px-6 py-16 md:px-10">
       <header className="flex flex-col gap-5">
         <nav aria-label="Site" className="flex gap-2 font-mono text-[9px] uppercase tracking-[0.18em]">
           <Chip href="/">← Showcase</Chip>
@@ -34,32 +37,24 @@ export default function DocsPage() {
         <p className="max-w-2xl text-showcase-muted">
           This page is a scroll-driven 3D showcase: one model, a camera path with a stop on every
           detail worth naming, and copy that fades in beside it. The model is swappable and the
-          camera path is edited in the browser, so the same site works for a product, a character
-          or a self portrait. Nine steps, from clone to deploy.
+          camera path is edited in the browser, so the same site carries a product, a character or a
+          self portrait. Part one makes the model. Part two makes the site.
         </p>
       </header>
 
-      <ol className="flex flex-col gap-10">
-        {STEPS.map((step) => (
-          <li key={step.n} className="flex flex-col gap-3 border-t border-showcase-line pt-5">
-            <p className="flex items-baseline gap-3">
-              <span className="font-mono text-[10px] tracking-[0.24em] text-showcase-primary">
-                {step.n}
-              </span>
-              <span className="font-display text-lg font-bold uppercase tracking-[0.04em]">
-                {step.title}
-              </span>
-            </p>
-            <p className="text-showcase-muted">{step.body}</p>
-            {step.code ? (
-              // Long commands must scroll inside the block, never widen the page.
-              <pre className="overflow-x-auto border border-showcase-line bg-card/60 p-3 font-mono text-[11px] leading-relaxed text-showcase-fg">
-                <code>{step.code}</code>
-              </pre>
-            ) : null}
-          </li>
-        ))}
-      </ol>
+      <Part
+        kicker="Part one"
+        title="Make the model"
+        lead="From a handful of generated images to a .glb small enough to ship. Every tool here is somebody else's; swap any of them for one you prefer."
+        steps={MODEL_STEPS}
+      />
+
+      <Part
+        kicker="Part two"
+        title="Build the site"
+        lead="Nine steps from clone to deployed, plus one that is just me asking to see the result."
+        steps={STEPS}
+      />
 
       <footer className="flex flex-col gap-3 border-t border-showcase-line pt-5 text-showcase-muted">
         <p>
@@ -73,6 +68,95 @@ export default function DocsPage() {
         </p>
       </footer>
     </main>
+  );
+}
+
+function Part({
+  kicker,
+  title,
+  lead,
+  steps,
+}: {
+  kicker: string;
+  title: string;
+  lead: string;
+  steps: readonly DocStep[];
+}) {
+  return (
+    <section className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-showcase-primary">
+          {kicker}
+        </p>
+        <h2 className="font-display text-[clamp(22px,4vw,32px)] font-bold uppercase leading-none">
+          {title}
+        </h2>
+        <p className="max-w-2xl text-showcase-muted">{lead}</p>
+      </div>
+
+      <ol className="flex flex-col gap-10">
+        {steps.map((step) => (
+          <li key={step.n} className="flex flex-col gap-3 border-t border-showcase-line pt-5">
+            <p className="flex items-baseline gap-3">
+              <span className="font-mono text-[10px] tracking-[0.24em] text-showcase-primary">
+                {step.n}
+              </span>
+              <span className="font-display text-lg font-bold uppercase tracking-[0.04em]">
+                {step.title}
+              </span>
+            </p>
+            <p className="text-showcase-muted">{step.body}</p>
+
+            {step.images ? (
+              <div className="mt-1 grid gap-4 sm:grid-cols-2">
+                {step.images.map((image) => (
+                  <figure key={image.src} className="flex flex-col gap-2">
+                    {/* Plain <img> on purpose: reference art below the fold, already
+                        lazy and already webp. next/image would put the optimizer —
+                        and its sharp dependency — in the standalone Docker runtime
+                        for two static files that never change size. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      width={1200}
+                      height={800}
+                      loading="lazy"
+                      className="w-full border border-showcase-line"
+                    />
+                    <figcaption className="font-mono text-[10px] uppercase tracking-[0.16em] text-showcase-muted">
+                      {image.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            ) : null}
+
+            {step.code ? (
+              // Long commands must scroll inside the block, never widen the page.
+              <pre className="overflow-x-auto border border-showcase-line bg-card/60 p-3 font-mono text-[11px] leading-relaxed text-showcase-fg">
+                <code>{step.code}</code>
+              </pre>
+            ) : null}
+
+            {step.links ? (
+              <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {step.links.map((link) => (
+                  <li key={link.href} className="font-mono text-[11px]">
+                    <Anchor href={link.href}>{link.label}</Anchor>
+                    {link.note ? (
+                      <span className="ml-2 text-[10px] uppercase tracking-[0.14em] text-showcase-muted">
+                        {link.note}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

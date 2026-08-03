@@ -140,9 +140,11 @@ and `/studio` stays locked.
 
 ## Docs
 
-`/docs` is the same story written for someone else's model: clone, drop a `.glb`
-into `public/`, wire the two env vars, tune, publish. It is a static page with no
-data behind it. Both routes reach it — the showcase carries a `DOCS` / `STUDIO`
+`/docs` is the same story written for someone else's model, in two parts: making
+the model (reference sheet → image-to-3D → Blender over MCP → a shipping-size
+`.glb`) and making the site (clone, wire the two env vars, tune, publish). It is a
+static page with no data behind it. The do/don't reference art in part one is a
+placeholder pair under `public/docs/` — swap the files, no code change. Both routes reach it — the showcase carries a `DOCS` / `STUDIO`
 pair in the bottom right, and the studio's lock screen points anyone who lands on
 it at the repo and the guide rather than at a password they do not have.
 
