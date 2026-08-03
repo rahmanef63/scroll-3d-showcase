@@ -89,12 +89,12 @@ export function ShowcaseStudio({
   );
 
   const playback = useStudioPlayback({ getProgress, scrollToProgress, onStop: seekSelect });
-  // Forgetting deletes the row this editor points at, so it has to leave. Any
-  // other model will do — the server re-picks when it re-renders.
-  const elsewhere = () => onSelectModel(models.find((e) => e.id !== modelId)?.id ?? '');
-  const actions = useStudioActions({ adapter, modelId, draft, liveModelId, onForgotten: elsewhere });
-  const step = (delta: number) =>
-    seek(draft.keyframes[clamp(draft.selected + delta, 0, draft.keyframes.length - 1)].p);
+  const actions = useStudioActions({
+    adapter, modelId, draft, liveModelId, onUploaded: onSelectModel,
+    // Forgetting deletes the row this editor points at, so it has to leave.
+    onForgotten: () => onSelectModel(models.find((e) => e.id !== modelId)?.id ?? ''),
+  });
+  const step = (d: number) => seek(draft.keyframes[clamp(draft.selected + d, 0, draft.keyframes.length - 1)].p);
 
   // Restoring a snapshot under a running rAF would fight it for the scroll.
   const undo = () => { playback.pause(); history.undo(); };
@@ -115,8 +115,8 @@ export function ShowcaseStudio({
     closeSheet: layout.closeSheet,
   });
 
-  // Same contract as the orbit drag: snap the page onto the selected key first,
-  // or the keys would edit one frame while the screen shows another.
+  // Same contract as the orbit drag: snap onto the selected key first, or the
+  // keys edit one frame while the screen shows another.
   const snap = () => {
     playback.pause();
     if (Math.abs(getProgress() - draft.current.p) > 0.004) scrollToProgress(draft.current.p, 'auto');
@@ -143,8 +143,8 @@ export function ShowcaseStudio({
     />
   );
 
-  // The HUD is the live preview for the two site-wide strings: type into COPY
-  // and the wordmark behind the chrome updates as you go.
+  // The HUD previews the site-wide strings: type into COPY and the wordmark
+  // behind the chrome updates as you go.
   const { title, bootTitle, brand } = draft.content;
   const labels = useMemo(() => ({ brand }), [brand]);
 
@@ -165,9 +165,9 @@ export function ShowcaseStudio({
         busy={actions.busy} status={actions.status}
         canUndo={history.canUndo} canRedo={history.canRedo}
         isLive={actions.liveId === modelId} missing={Boolean(model?.missing)}
-        onGoLive={actions.goLive} onForget={actions.forget}
+        uploaded={Boolean(model?.uploaded)} onGoLive={actions.goLive} onForget={actions.forget}
         onSelectModel={onSelectModel} onUndo={undo} onRedo={redo}
-        onSync={actions.sync} onSave={actions.save} onCopy={actions.copy}
+        onSync={actions.sync} onUpload={actions.upload} onSave={actions.save} onCopy={actions.copy}
         onExport={actions.exportJson} onImport={actions.importJson}
       />
 

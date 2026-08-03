@@ -49,10 +49,12 @@ export default async function HomePage() {
   // chunk has downloaded and hydrated. This puts one <link rel="preload"> in the
   // head, so the transfer begins while the HTML is still being parsed.
   //
-  // `as: 'fetch'` with no crossOrigin, matching the loader's same-origin XHR — a
-  // mismatch here would fetch the whole thing twice. The Cache-Control in
-  // next.config.ts is the belt for that.
-  preload(showcase.modelUrl, { as: 'fetch' });
+  // The preload has to match the request the loader will make or the browser
+  // fetches the whole thing twice: a file in public/ is a plain same-origin XHR,
+  // and one in the backend's storage is a CORS request. The Cache-Control in
+  // next.config.ts is the belt for the first case.
+  const bundled = showcase.modelUrl.startsWith('/');
+  preload(showcase.modelUrl, { as: 'fetch', ...(bundled ? {} : { crossOrigin: 'anonymous' }) });
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { forget, live, setLive, sync, toModelId } from '@/convex/models';
 
 /**
@@ -33,10 +33,26 @@ interface Row {
   _id: string;
   modelId: string;
   name: string;
-  url: string;
+  url?: string;
+  storageId?: string;
   bytes: number;
   live?: boolean;
   missing?: boolean;
+}
+
+/** Enough of `ctx.storage` for the uploaded-model paths. */
+function fakeStorage(present = new Set<string>()) {
+  const deleted: string[] = [];
+  return {
+    deleted,
+    async getUrl(id: string) {
+      return present.has(id) ? `https://files.example/${id}` : null;
+    },
+    async delete(id: string) {
+      deleted.push(id);
+      present.delete(id);
+    },
+  };
 }
 
 /** Just enough of `ctx.db` for the by_modelId upsert path. */
@@ -272,5 +288,78 @@ describe('publishing', () => {
     vi.stubEnv('STUDIO_TOKEN', '');
     await expect(call(db, [file('hitman.glb')])).rejects.toThrow(/not set/i);
     expect(db.rows).toHaveLength(0);
+  });
+});
+
+/* ------------------------------------------------------------ uploaded rows */
+
+const uploaded = (modelId: string, storageId: string, over: Partial<Row> = {}): Row => ({
+  _id: `up-${modelId}`,
+  modelId,
+  name: modelId,
+  storageId,
+  bytes: 1024,
+  ...over,
+});
+
+describe('a model uploaded through the studio', () => {
+  beforeEach(() => {
+    vi.stubEnv('STUDIO_TOKEN', TOKEN);
+  });
+
+  it('survives a SYNC that never sees it', async () => {
+    // It was never in public/ and never will be. Flagging it here would take the
+    // site's hero down on the first SYNC after an upload.
+    const db = fakeDb();
+    db.rows.push(uploaded('portrait', 'file-1'));
+    await call(db, [file('hitman.glb')]);
+
+    expect(db.rows.find((row) => row.modelId === 'portrait')?.missing).toBeFalsy();
+  });
+
+  it('is not counted among the missing', async () => {
+    const db = fakeDb();
+    db.rows.push(uploaded('portrait', 'file-1'));
+    const result = await call(db, [file('hitman.glb')]);
+    expect(result.missing).toBe(0);
+  });
+
+  it('resolves its URL from storage at read time', async () => {
+    const db = fakeDb();
+    const storage = fakeStorage(new Set(['file-1']));
+    db.rows.push(uploaded('portrait', 'file-1', { live: true }));
+
+    const live = await runLive({ db, storage } as unknown, {} as Record<string, never>);
+    expect(live).toMatchObject({ id: 'portrait', url: 'https://files.example/file-1' });
+  });
+
+  it('is not served once its file is gone from storage', async () => {
+    // Same rule as a scanned file that left public/: the bundled asset is a
+    // worse page than the one that was published, and a 404 is worse than both.
+    const db = fakeDb();
+    db.rows.push(uploaded('portrait', 'file-1', { live: true }));
+    const live = await runLive({ db, storage: fakeStorage() } as unknown, {} as Record<string, never>);
+    expect(live).toBeNull();
+  });
+
+  it('takes its bytes with it when forgotten', async () => {
+    const db = fakeDb();
+    const storage = fakeStorage(new Set(['file-1']));
+    db.rows.push(uploaded('portrait', 'file-1'));
+
+    await runForget({ db, storage } as unknown, { token: TOKEN, modelId: 'portrait' });
+    expect(storage.deleted).toEqual(['file-1']);
+    expect(db.rows).toHaveLength(0);
+  });
+
+  it('cannot be deleted while it is the live model', async () => {
+    const db = fakeDb();
+    const storage = fakeStorage(new Set(['file-1']));
+    db.rows.push(uploaded('portrait', 'file-1', { live: true }));
+
+    await expect(
+      runForget({ db, storage } as unknown, { token: TOKEN, modelId: 'portrait' }),
+    ).rejects.toThrow(/publish another model/i);
+    expect(storage.deleted).toEqual([]);
   });
 });

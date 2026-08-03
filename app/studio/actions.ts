@@ -4,6 +4,7 @@ import { updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { getConvex } from '@/lib/convex-server';
 import { SHOWCASE_TAG } from '@/lib/showcase-source';
 import { STUDIO_COOKIE, isStudioUnlocked, matchesStudioToken } from '@/lib/studio-auth';
@@ -75,6 +76,37 @@ export async function forgetModel(modelId: string): Promise<void> {
 
   await convex.mutation(api.models.forget, { token, modelId });
   updateTag(SHOWCASE_TAG);
+}
+
+/**
+ * Hands the browser a one-shot URL to POST a file to. The studio token stays on
+ * this side; the upload itself goes straight to the backend rather than through
+ * this server, which has a body-size limit and no reason to hold the bytes.
+ */
+export async function createModelUpload(): Promise<string> {
+  await requireUnlocked();
+  const { convex, token } = requireBackend();
+  return convex.mutation(api.uploads.generateUploadUrl, { token });
+}
+
+/**
+ * Turns an uploaded file into a model row, or gets it deleted. Everything the
+ * browser says here is a claim — the backend reads the bytes and decides.
+ */
+export async function registerModel(storageId: string, name: string): Promise<string> {
+  await requireUnlocked();
+  const { convex, token } = requireBackend();
+  if (typeof storageId !== 'string' || !storageId) throw new Error('Missing upload id');
+  if (typeof name !== 'string' || !name.trim()) throw new Error('Missing file name');
+
+  const { id } = await convex.action(api.uploads.register, {
+    token,
+    storageId: storageId as Id<'_storage'>,
+    name: name.trim().slice(0, 120),
+  });
+  // Nothing on the public page changes until someone publishes it, so no
+  // updateTag here — that is GO LIVE's job.
+  return id;
 }
 
 /** `preset` is typed `unknown` on purpose: it arrives from the browser. */

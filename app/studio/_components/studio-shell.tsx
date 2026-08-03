@@ -16,6 +16,11 @@ interface StudioShellProps {
   preset: ShowcasePreset;
   liveModelId: string;
   adapter: ShowcaseStudioAdapter;
+  /** Server actions for the two halves of an upload. Absent with no backend. */
+  upload?: {
+    createUrl: () => Promise<string>;
+    register: (storageId: string, name: string) => Promise<string>;
+  };
 }
 
 /**
@@ -34,8 +39,29 @@ export function StudioShell({
   preset,
   liveModelId,
   adapter,
+  upload,
 }: StudioShellProps) {
   const router = useRouter();
+
+  /**
+   * The file goes from this browser straight to the backend's storage: the
+   * server action only mints the URL and, afterwards, vouches for what landed.
+   * Routing megabytes through a server action would hit its body limit and
+   * spend the transfer twice.
+   */
+  const uploadModel = upload
+    ? async (file: File) => {
+        const url = await upload.createUrl();
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': file.type || 'model/gltf-binary' },
+          body: file,
+        });
+        if (!response.ok) throw new Error(`Storage refused the upload (${response.status})`);
+        const { storageId } = (await response.json()) as { storageId: string };
+        return upload.register(storageId, file.name);
+      }
+    : undefined;
 
   return (
     <ShowcaseStudio
@@ -45,7 +71,7 @@ export function StudioShell({
       liveModelId={liveModelId}
       blockIds={BLOCK_IDS}
       contentPresets={CONTENT_PRESETS}
-      adapter={adapter}
+      adapter={{ ...adapter, uploadModel }}
       onSelectModel={(id) => router.push(`/studio?model=${encodeURIComponent(id)}`)}
     />
   );

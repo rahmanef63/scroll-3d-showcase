@@ -18,7 +18,14 @@ import {
 import type { ShowcaseModel, ShowcasePreset } from '@/slices/scroll-3d-showcase/studio';
 import { StudioShell } from './_components/studio-shell';
 import { UnlockForm } from './_components/unlock-form';
-import { forgetModel, savePreset, setLiveModel, syncModels } from './actions';
+import {
+  createModelUpload,
+  forgetModel,
+  registerModel,
+  savePreset,
+  setLiveModel,
+  syncModels,
+} from './actions';
 
 export const metadata: Metadata = {
   title: 'Studio — scroll-3d-showcase',
@@ -86,6 +93,7 @@ async function StudioGate({ searchParams }: { searchParams: SearchParams }) {
       preset={preset}
       liveModelId={liveModelId}
       adapter={{ syncModels, savePreset, setLiveModel, forgetModel }}
+      upload={{ createUrl: createModelUpload, register: registerModel }}
     />
   );
 }

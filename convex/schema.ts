@@ -64,7 +64,14 @@ export default defineSchema({
     /** Slug of the path under public/, assigned once and never reassigned. */
     modelId: v.string(),
     name: v.string(),
-    url: v.string(),
+    /**
+     * Path under public/ for a file the host scanned. Absent on an uploaded
+     * model, whose URL is resolved from `storageId` at read time — storage URLs
+     * are the deployment's to hand out, not ours to cache in a row.
+     */
+    url: v.optional(v.string()),
+    /** Set only on a model uploaded through /studio. Exactly one of the two. */
+    storageId: v.optional(v.id('_storage')),
     bytes: v.number(),
     /**
      * The one model `/` renders. At most one row carries it — `models.setLive`

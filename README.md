@@ -92,6 +92,11 @@ What each toolbar action does:
 - **SYNC** scans `public/` for `.glb`/`.gltf`, gives each new file an id derived
   from its path (`rahman-3d.glb` → `rahman-3d`) and registers it. Ids are assigned once
   and never reassigned, so a saved camera path stays attached to its model.
+- **UPLOAD** is the other way in, and the only one that does not need a git
+  checkout: the file goes from the browser straight into the backend's storage,
+  no rebuild and no deploy. See *Uploads* below for what it costs and what it
+  checks. A `SYNC` never touches an uploaded row — it was never in `public/` and
+  never will be — and **FORGET** is what deletes one, taking its bytes with it.
 - **GO LIVE** points `/` at the selected model. A model whose file has left
   `public/` reads `NO FILE` and cannot be published; if it was already live when
   the file went, `/` falls back to the bundled asset rather than serving a 404.
@@ -141,6 +146,34 @@ What each toolbar action does:
 Both env vars are optional and both fail closed — see `.env.example`. With
 neither set the site builds and renders exactly as it did before Convex existed,
 and `/studio` stays locked.
+
+## Uploads
+
+Two routes in, and they trade different things:
+
+| | `public/` + SYNC | UPLOAD in /studio |
+|---|---|---|
+| Adding a model | commit, rebuild, redeploy | drag a file |
+| Needs git access | yes | no |
+| Serving cost | static asset, free | backend bandwidth, per view |
+| Works with no backend | yes | there is nothing to upload to |
+
+The upload path is the one place a stranger's bytes enter the deployment, and
+every byte that survives is then served to every visitor, so it is checked twice
+over:
+
+- **In the browser, before anything is sent** — extension, size against the
+  16 MB cap, and the twelve-byte glB header. A file refused here costs nothing.
+- **In the backend, on what actually arrived** — `uploads.register` is an action
+  rather than a mutation for exactly one reason: it is the only place that can
+  read the bytes. It re-checks the size, that the magic is `glTF`, that the
+  version is 2, and that the header's own length field matches the file. A .png
+  renamed `.glb` fails there, and **anything that fails is deleted on the spot**,
+  including when the check itself throws — so a rejected upload never sits in
+  storage costing anything. Only then does an internal mutation write the row.
+
+The cap is a bandwidth budget rather than a storage one: 16 MB is a raw
+generator export with room to spare, and a compressed one is a third of that.
 
 ## Docs
 

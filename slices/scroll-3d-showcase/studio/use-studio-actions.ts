@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { fromPreset } from './draft-utils';
+import { pickGlbFile, requireGlbFile } from './model-file';
 import { downloadJson, fromPresetFile, pickJsonFile, toPresetFile } from './preset-file';
 import { copyText, keyframesToSource } from './to-source';
 import type { ShowcaseStudioAdapter } from './types';
@@ -23,6 +24,8 @@ export interface StudioActions {
   exportJson: () => void;
   /** Loads a JSON file into the draft. Nothing is written until SAVE. */
   importJson: () => void;
+  /** Undefined when the adapter cannot store files; the chrome hides the chip. */
+  upload?: () => void;
   applyScene: () => void;
   /** Undefined when the adapter cannot publish; the chrome hides the chip then. */
   goLive?: () => void;
@@ -38,6 +41,8 @@ export interface UseStudioActionsArgs {
   liveModelId: string;
   /** Where to go once the current model no longer exists. */
   onForgotten: () => void;
+  /** Where to go once a new model exists. */
+  onUploaded: (modelId: string) => void;
 }
 
 /**
@@ -58,6 +63,7 @@ export function useStudioActions({
   draft,
   liveModelId,
   onForgotten,
+  onUploaded,
 }: UseStudioActionsArgs): StudioActions {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
@@ -99,6 +105,7 @@ export function useStudioActions({
 
   const publish = adapter.setLiveModel;
   const drop = adapter.forgetModel;
+  const store = adapter.uploadModel;
 
   return {
     busy,
@@ -112,6 +119,21 @@ export function useStudioActions({
             await publish(modelId);
             setPublished(modelId);
             return 'NOW LIVE';
+          })
+      : undefined,
+    upload: store
+      ? () =>
+          void run('UPLOADING', async () => {
+            const file = await pickGlbFile();
+            if (!file) return 'UPLOAD CANCELLED';
+            // Refused here, the bytes never leave the machine. The backend
+            // repeats the same checks on what it actually received.
+            await requireGlbFile(file);
+            const modelId = await store(file);
+            // Straight to the new model: an upload nobody navigates to looks
+            // exactly like an upload that failed.
+            onUploaded(modelId);
+            return `UPLOADED ${(file.size / 1048576).toFixed(1)}MB`;
           })
       : undefined,
     forget: drop

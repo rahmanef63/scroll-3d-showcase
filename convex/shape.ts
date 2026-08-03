@@ -1,0 +1,64 @@
+import { v } from 'convex/values';
+import type { Id } from './_generated/dataModel';
+
+/** public/ holds a handful of .glb files; this caps reads, writes and payload. */
+export const MAX_MODELS = 200;
+
+export const modelValidator = v.object({
+  id: v.string(),
+  name: v.string(),
+  url: v.string(),
+  bytes: v.number(),
+  /** Uploaded through /studio rather than scanned out of public/. */
+  uploaded: v.boolean(),
+  /** File no longer in the host's scan, or a storage id with nothing behind it. */
+  missing: v.boolean(),
+});
+
+/**
+ * ID RULE: slug of the path under public/ without its extension.
+ * 'hitman.glb' -> 'hitman', 'models/car.glb' -> 'models-car'.
+ */
+export function toModelId(path: string): string {
+  return path
+    .replace(/^\/+/, '')
+    .replace(/\.(glb|gltf)$/i, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/** Files live under public/, which Next serves from the site root. */
+export function toUrl(path: string): string {
+  return encodeURI(`/${path.replace(/^\/+/, '')}`);
+}
+
+interface ModelRow {
+  modelId: string;
+  name: string;
+  url?: string;
+  storageId?: Id<'_storage'>;
+  bytes: number;
+  live?: boolean;
+  missing?: boolean;
+}
+
+/**
+ * Resolves the row to something a browser can fetch.
+ *
+ * An uploaded model has no URL of its own — the deployment mints one per read,
+ * and a row that cached it would go stale the day that changes. A storage id
+ * whose file is gone resolves to null, which is the same situation as a scanned
+ * file that left public/: reported as missing rather than served as a 404.
+ */
+export async function toModel(ctx: { storage: { getUrl: (id: Id<'_storage'>) => Promise<string | null> } }, row: ModelRow) {
+  const url = row.storageId ? await ctx.storage.getUrl(row.storageId) : (row.url ?? '');
+  return {
+    id: row.modelId,
+    name: row.name,
+    url: url ?? '',
+    bytes: row.bytes,
+    uploaded: Boolean(row.storageId),
+    missing: Boolean(row.missing) || !url,
+  };
+}

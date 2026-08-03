@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { ChromeFiles } from './chrome-files';
 import { ChromeModel } from './chrome-model';
 import { ASPECTS } from './presets';
 import { BAR, Chip, INPUT, LABEL, SURFACE } from './studio-ui';
@@ -22,9 +23,13 @@ export interface StudioChromeProps {
   isLive: boolean;
   /** Selected model's file is gone from the host's scan. */
   missing: boolean;
+  /** Selected model lives in storage rather than in public/. */
+  uploaded: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onSync: () => void;
+  /** Absent when the adapter cannot store files — no chip rather than a dead one. */
+  onUpload?: () => void;
   onSave: () => void;
   onCopy: () => void;
   /** Downloads the draft as JSON. */
@@ -41,7 +46,7 @@ const LEGEND =
   'WASD/QE FLY · SHIFT FAST · 1–9 KEY · ←→ STEP · SPACE PLAY · F FOCUS · ⌘S SAVE · Z UNDO · P PREVIEW';
 const GLYPH = 'px-2 text-[13px] leading-none tracking-normal';
 
-/** Top bar: identity, model, the three backend actions, history, dirty state. */
+/** Top bar: identity, model, the backend actions, history, dirty state. */
 export function StudioChrome({
   models,
   modelId,
@@ -54,9 +59,11 @@ export function StudioChrome({
   layout,
   isLive,
   missing,
+  uploaded,
   onUndo,
   onRedo,
   onSync,
+  onUpload,
   onSave,
   onCopy,
   onExport,
@@ -87,42 +94,26 @@ export function StudioChrome({
 
       <ChromeModel
         models={models} modelId={modelId} busy={busy} isLive={isLive} missing={missing}
-        onSelectModel={onSelectModel} onGoLive={onGoLive} onForget={onForget}
+        uploaded={uploaded} onSelectModel={onSelectModel} onGoLive={onGoLive} onForget={onForget}
       />
 
       <Chip disabled={busy} onClick={onSync} title="Rescan public/ for .glb files">
         SYNC
       </Chip>
+      {/* The other way a model arrives: no repo, no rebuild, no deploy. */}
+      {onUpload ? (
+        <Chip disabled={busy} onClick={onUpload} title="Upload a .glb to the backend">
+          <span className="lg:hidden">UP</span>
+          <span className="hidden lg:inline">UPLOAD</span>
+        </Chip>
+      ) : null}
       <Chip disabled={busy || !dirty} onClick={onSave} title="Save preset (S)">
         SAVE
       </Chip>
-      <Chip
-        disabled={busy}
-        onClick={onCopy}
-        title="Paste over DEFAULT_KEYFRAMES in config/keyframes.ts"
-      >
-        <span className="lg:hidden">TS</span>
-        <span className="hidden lg:inline">COPY TS</span>
-      </Chip>
+      <ChromeFiles busy={busy} onCopy={onCopy} onExport={onExport} onImport={onImport} />
 
-      {/* The pair that survives a model swap: a preset belongs to one model id,
-          so swapping the .glb strands its tuning unless it can leave as a file
-          and come back on the other side. */}
-      <Chip disabled={busy} onClick={onExport} title="Download this preset as a JSON file">
-        <span className="lg:hidden">EXP</span>
-        <span className="hidden lg:inline">EXPORT</span>
-      </Chip>
-      <Chip
-        disabled={busy}
-        onClick={onImport}
-        title="Load a preset JSON into this model — SAVE still has to be pressed"
-      >
-        <span className="lg:hidden">IMP</span>
-        <span className="hidden lg:inline">IMPORT</span>
-      </Chip>
-
-      {/* A hairline arrow at the bar's 9px reads as an empty box, so these two
-          opt out of LABEL's size — they are the only glyph-only chips. */}
+      {/* A hairline arrow at 9px reads as an empty box, so these two opt out of
+          LABEL's size — the only glyph-only chips in the bar. */}
       <Chip disabled={!canUndo} onClick={onUndo} title="Undo (Z)" className={GLYPH}>
         ↶
       </Chip>
@@ -172,9 +163,9 @@ export function StudioChrome({
         </span>
       </span>
 
-      {/* SYNC and SAVE are network round-trips with no progress to report. The
-          status slot says what is running; this says it is still running, which
-          on a slow link is the difference between "working" and "broken". */}
+      {/* The backend actions are round-trips with no progress to report. The
+          status slot says what is running; this says it still is — on a slow
+          link that is the difference between "working" and "broken". */}
       {busy ? (
         <span
           aria-hidden

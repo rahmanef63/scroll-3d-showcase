@@ -52,7 +52,7 @@ export default function DocsPage() {
       <Part
         kicker="Part two"
         title="Build the site"
-        lead="Nine steps from clone to deployed, plus one that is just me asking to see the result."
+        lead="Eleven steps from clone to deployed, the last of which is just me asking to see the result."
         steps={STEPS}
       />
 

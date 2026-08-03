@@ -12,6 +12,11 @@ export interface ShowcaseModel {
   url: string;
   bytes: number;
   /**
+   * Uploaded through the studio rather than found on the host's disk. It has no
+   * file anyone can replace, so deleting the row is the only way to remove it.
+   */
+  uploaded?: boolean;
+  /**
    * The file is gone. The row survives so its id is never reassigned and its
    * preset is not lost, but it cannot be published — the editor says so rather
    * than letting you point a live site at a 404.
@@ -54,8 +59,14 @@ export interface ShowcaseStudioAdapter {
    */
   setLiveModel?(modelId: string): Promise<void>;
   /**
-   * Drops a model whose file is gone. Optional, and only ever offered for a row
-   * already flagged `missing` — there is nothing to forget otherwise.
+   * Drops a model whose file is gone, or an uploaded one along with its bytes.
+   * Optional; a host with neither case hides the chip entirely.
    */
   forgetModel?(modelId: string): Promise<void>;
+  /**
+   * Stores a .glb the visitor picked and returns the new model's id. Optional:
+   * a host with no writable storage simply has no UPLOAD chip, and models keep
+   * arriving through the filesystem scan.
+   */
+  uploadModel?(file: File): Promise<string>;
 }

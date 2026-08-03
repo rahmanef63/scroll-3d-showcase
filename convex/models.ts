@@ -1,57 +1,18 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireAtMost, requireStudioToken } from './lib';
+import { MAX_MODELS, modelValidator, toModel, toModelId, toUrl } from './shape';
 
-/** public/ holds a handful of .glb files; this caps reads, writes and payload. */
-const MAX_MODELS = 200;
-
-const modelValidator = v.object({
-  id: v.string(),
-  name: v.string(),
-  url: v.string(),
-  bytes: v.number(),
-  /** File no longer in the host's scan. Kept in the list so it is visible, not silent. */
-  missing: v.boolean(),
-});
-
-/**
- * ID RULE: slug of the path under public/ without its extension.
- * 'hitman.glb' -> 'hitman', 'models/car.glb' -> 'models-car'.
- */
-export function toModelId(path: string): string {
-  return path
-    .replace(/^\/+/, '')
-    .replace(/\.(glb|gltf)$/i, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/** Files live under public/, which Next serves from the site root. */
-function toUrl(path: string): string {
-  return encodeURI(`/${path.replace(/^\/+/, '')}`);
-}
-
-const toModel = (row: {
-  modelId: string;
-  name: string;
-  url: string;
-  bytes: number;
-  missing?: boolean;
-}) => ({
-  id: row.modelId,
-  name: row.name,
-  url: row.url,
-  bytes: row.bytes,
-  missing: Boolean(row.missing),
-});
+// Re-exported because the ID RULE is what the host's constants are checked
+// against, and that check imports from here.
+export { toModelId };
 
 export const list = query({
   args: {},
   returns: v.array(modelValidator),
   handler: async (ctx) => {
     const rows = await ctx.db.query('models').withIndex('by_modelId').take(MAX_MODELS);
-    return rows.map(toModel);
+    return Promise.all(rows.map((row) => toModel(ctx, row)));
   },
 });
 
@@ -71,7 +32,10 @@ export const live = query({
     // permanently blank canvas. Falling back to the host's bundled asset is the
     // one degradation a visitor can actually use.
     const row = rows.find((entry) => entry.live && !entry.missing);
-    return row ? toModel(row) : null;
+    if (!row) return null;
+    const model = await toModel(ctx, row);
+    // A published upload whose file was deleted out from under it lands here.
+    return model.missing ? null : model;
   },
 });
 
@@ -115,8 +79,16 @@ export const forget = mutation({
       .withIndex('by_modelId', (q) => q.eq('modelId', args.modelId))
       .unique();
     if (!row) throw new Error(`Unknown model: ${args.modelId.slice(0, 40)}`);
-    if (!row.missing) throw new Error('Only a model whose file is gone can be forgotten');
+    // An upload has no file in public/ to go missing, so this is the only way to
+    // delete one — and the only way its bytes ever leave storage.
+    if (!row.missing && !row.storageId) {
+      throw new Error('Only a model whose file is gone can be forgotten');
+    }
+    if (row.live && !row.missing) {
+      throw new Error('Publish another model before deleting the live one');
+    }
 
+    if (row.storageId) await ctx.storage.delete(row.storageId);
     await ctx.db.delete(row._id);
     return null;
   },
@@ -170,6 +142,9 @@ export const sync = mutation({
     const rows = await ctx.db.query('models').withIndex('by_modelId').take(MAX_MODELS);
     let missing = 0;
     for (const row of rows) {
+      // An uploaded model was never in the scan and never will be. Flagging it
+      // here would delete the site's hero on the first SYNC after an upload.
+      if (row.storageId) continue;
       const gone = !seen.has(row.modelId);
       if (gone) missing += 1;
       if (Boolean(row.missing) !== gone) await ctx.db.patch(row._id, { missing: gone });

@@ -12,6 +12,8 @@ export interface ChromeModelProps {
   isLive: boolean;
   /** The selected model's file is gone from the host's scan. */
   missing: boolean;
+  /** The selected model lives in the backend's storage, not in public/. */
+  uploaded: boolean;
   onSelectModel: (id: string) => void;
   onGoLive?: () => void;
   onForget?: () => void;
@@ -20,6 +22,7 @@ export interface ChromeModelProps {
 /** `bytes === 0` is the fallback model's placeholder; printing "0KB" reads as an error. */
 const modelLabel = (entry: ShowcaseModel) => {
   if (entry.missing) return `${entry.name} · MISSING`;
+  if (entry.uploaded) return `${entry.name} · ${(entry.bytes / 1048576).toFixed(1)}MB ↑`;
   return entry.bytes > 0 ? `${entry.name} · ${(entry.bytes / 1048576).toFixed(1)}MB` : entry.name;
 };
 
@@ -35,6 +38,7 @@ export function ChromeModel({
   busy,
   isLive,
   missing,
+  uploaded,
   onSelectModel,
   onGoLive,
   onForget,
@@ -77,13 +81,18 @@ export function ChromeModel({
     </Chip>
   ) : null}
 
-  {/* Costs nothing in the normal case: a row is only forgettable once its
-      file is already gone, so this is absent on every healthy model. */}
-  {missing && onForget ? (
+  {/* A scanned row is only forgettable once its file is already gone; an
+      uploaded one always is, because deleting it is the only way to get its
+      bytes back out of storage. */}
+  {(missing || uploaded) && onForget ? (
     <Chip
       disabled={busy}
       onClick={onForget}
-      title="Drop this row. Its saved preset stays, and comes back if the file does."
+      title={
+        uploaded
+          ? 'Delete this model and its file. The saved preset stays behind.'
+          : 'Drop this row. Its saved preset stays, and comes back if the file does.'
+      }
       className="hover:text-showcase-accent"
     >
       FORGET
