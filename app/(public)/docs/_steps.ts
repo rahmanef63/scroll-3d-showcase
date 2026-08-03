@@ -97,8 +97,8 @@ export const STEPS: readonly DocStep[] = [
     body: 'No environment variables, no backend, no account. What you get is this site: the bundled model, the default camera path, and the copy that lives in app/(public)/_content/copy.ts. Everything below is optional on top of a page that already works.',
     code: `git clone ${REPO_URL}.git
 cd scroll-3d-showcase
-npm install
-npm run dev          # http://localhost:3000`,
+bun install
+bun dev              # http://localhost:3000`,
   },
   {
     n: '02',
@@ -109,8 +109,8 @@ npm run dev          # http://localhost:3000`,
     n: '03',
     title: 'Add a backend, if you want the editor',
     body: 'Convex holds two tables: the models it has seen, and one preset per model. Both ends compare the same token — the deployment copy guards every write, the local copy unlocks /studio. Skip this step entirely and the public page still renders; only the editor stays shut.',
-    code: `npx convex dev                              # creates the deployment
-npx convex env set STUDIO_TOKEN <password>  # guards the mutations
+    code: `bunx convex dev                              # creates the deployment
+bunx convex env set STUDIO_TOKEN <password>  # guards the mutations
 echo 'STUDIO_TOKEN=<password>' >> .env.local`,
   },
   {
@@ -137,7 +137,7 @@ echo 'STUDIO_TOKEN=<password>' >> .env.local`,
     n: '08',
     title: 'Keep the tuning portable',
     body: 'EXPORT downloads the whole preset — camera, markers, scene settings and every word — as JSON. IMPORT reads one back into whichever model is open, which is how a tuning session survives swapping the .glb for a better export under a new name. It is also the shortest route through a language model: export the file, ask for a rewritten set of panels or a different camera rhythm, import the answer. Nothing is written until you press SAVE, so a bad suggestion costs one undo. The files under seed/ are exactly these files, and one command writes one straight into a deployment.',
-    code: 'npx convex run seed:preset "$(cat seed/rahman-3d.json)"',
+    code: 'bunx convex run seed:preset "$(cat seed/rahman-3d.json)"',
   },
   {
     n: '09',

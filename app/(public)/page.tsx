@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from 'next/cache';
 import type { Metadata } from 'next';
+import { preload } from 'react-dom';
 import { SHOWCASE_TAG, loadShowcase } from '@/lib/showcase-source';
 import { SiteNav } from './_components/site-nav';
 import { TalentShowcase } from './_components/talent-showcase';
@@ -43,6 +44,15 @@ export default async function HomePage() {
   cacheTag(SHOWCASE_TAG);
 
   const showcase = await loadShowcase();
+
+  // The model is megabytes, and nothing can start fetching it until the engine
+  // chunk has downloaded and hydrated. This puts one <link rel="preload"> in the
+  // head, so the transfer begins while the HTML is still being parsed.
+  //
+  // `as: 'fetch'` with no crossOrigin, matching the loader's same-origin XHR — a
+  // mismatch here would fetch the whole thing twice. The Cache-Control in
+  // next.config.ts is the belt for that.
+  preload(showcase.modelUrl, { as: 'fetch' });
 
   return (
     <>

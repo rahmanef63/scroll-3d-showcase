@@ -1,23 +1,10 @@
 import { Box3, Mesh, Vector3, type Object3D } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import type { ShowcaseErrorCode } from '../types';
+import { ShowcaseLoadError } from './load-error';
 
-export class ShowcaseLoadError extends Error {
-  readonly code: ShowcaseErrorCode;
-  /**
-   * True only for transport-level failures. A server that answered with 404 has
-   * given a definitive answer, so retrying over a different transport would
-   * just replace a useful message with a confusing one.
-   */
-  readonly retryable: boolean;
-
-  constructor(code: ShowcaseErrorCode, detail?: string, retryable = false) {
-    super(detail ?? code);
-    this.name = 'ShowcaseLoadError';
-    this.code = code;
-    this.retryable = retryable;
-  }
-}
+// Re-exported from where it has always lived: the class itself moved to a
+// three-free module so the engine hook can catch it without importing three.
+export { ShowcaseLoadError };
 
 const isFileProtocol = () =>
   typeof location !== 'undefined' && location.protocol === 'file:';

@@ -8,14 +8,18 @@ Built to rr conventions: the feature is a vertical slice, the app is a thin host
 ## Run it
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000
+bun install
+bun dev          # http://localhost:3000
 ```
 
 ```bash
-npm run validate # typecheck + file-size audit + tests
-npm run build && npm start
+bun run validate # typecheck + file-size audit + tests
+bun run build && bun start
 ```
+
+Bun is the documented runner — it installs this tree in about 20s and `bun.lock`
+is what the Dockerfile builds from. Nothing here is bun-only: `package.json` is
+plain, so npm or pnpm still work if you delete the lockfile and use your own.
 
 ## Layout
 
@@ -114,8 +118,8 @@ What each toolbar action does:
   the backend:
 
   ```sh
-  npx convex run seed:preset "$(cat seed/rahman-3d.json)"          # dev
-  npx convex run seed:preset --prod "$(cat seed/rahman-3d.json)"   # production
+  bunx convex run seed:preset "$(cat seed/rahman-3d.json)"          # dev
+  bunx convex run seed:preset --prod "$(cat seed/rahman-3d.json)"   # production
   ```
 
   `seed/hitman.json` does the same for the demo asset. Seeding refuses to
@@ -148,6 +152,33 @@ placeholder pair under `public/docs/` — swap the files, no code change. Both r
 pair in the bottom right, and the studio's lock screen points anyone who lands on
 it at the repo and the guide rather than at a password they do not have.
 
+## Performance
+
+The page is a 3D scene, so the two things that matter are how much JavaScript
+runs before anything appears and how early the model starts downloading.
+
+- **three is not in the first load.** `use-showcase-engine` imports the engine
+  module inside its effect, so three, the GLTF loader and the scene graph —
+  ~640 KB — arrive in their own chunk after the HTML has painted. Initial JS for
+  `/` went from 1323 KB to 682 KB. The HUD and every copy panel are still
+  server-rendered, so this costs nothing in SEO or first paint; only the canvas
+  waits, and it already had a boot overlay.
+- **The model preloads from the document.** `ReactDOM.preload(modelUrl, { as:
+  'fetch' })` puts a `<link rel="preload">` in the head, so the megabytes start
+  moving while the HTML is still parsing instead of after hydration. No
+  `crossOrigin`, matching the loader's same-origin XHR — a mismatch there
+  downloads the file twice.
+- **Assets carry cache headers.** Next serves `public/` with `max-age=0`, which
+  is a revalidation round trip per view on a file measured in megabytes. Models
+  and reference art get an hour of freshness and a week of stale-while-
+  revalidate; hashed font files get a year, immutable.
+- **`optimizePackageImports: ['three']`** resolves named imports to the modules
+  that define them rather than walking the package barrel.
+
+Deliberately not enabled: the React Compiler. This tree writes to refs from a
+rAF loop 60×/s and hand-tunes what re-renders; automatic memoisation there is a
+behaviour change to debug, not a free win.
+
 ## Stack
 
 Next.js 16.2 (App Router, Cache Components) · React 19 · Tailwind v4 ·
@@ -165,7 +196,7 @@ empty, which is how this site is deployed today.
 | --- | --- |
 | `slice.json` / `slice.manifest.json` shape | `TODO(rr): confirm` — written without the rr repo on this machine. Run `audit:slices` and reshape if the validator disagrees. |
 | Theme tokens | Slice-scoped `--showcase-*` rather than the tones SSOT. Marked `TODO(rr): confirm` in `globals.css` and `lib/theme-colors.ts`. |
-| `components/ui/button.tsx` | Hand-written stand-in — the shadcn registry was unreachable during the build. Replace with `npx shadcn add button`. |
+| `components/ui/button.tsx` | Hand-written stand-in — the shadcn registry was unreachable during the build. Replace with `bunx shadcn add button`. |
 | Copy-first / Source Map | Not applied; no rr repo was available to copy from. |
 
 ## The old static build

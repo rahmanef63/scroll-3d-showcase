@@ -1,13 +1,15 @@
-FROM node:22-alpine AS deps
+# Bun installs and builds; the runtime stays Node, because `output: standalone`
+# traces Node's resolution and server.js is what Next tests against.
+FROM oven/bun:1-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-FROM node:22-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN bun run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

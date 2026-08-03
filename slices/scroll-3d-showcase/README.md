@@ -11,8 +11,8 @@ through an adapter, so it stays backend-agnostic too.
 
 ```bash
 npx rr add scroll-3d-showcase
-npm i three && npm i -D @types/three
-npx shadcn add button          # only if components/ui/button.tsx isn't vendored yet
+bun add three && bun add -d @types/three
+bunx shadcn add button          # only if components/ui/button.tsx isn't vendored yet
 ```
 
 Then drop a `.glb` into `public/`, add the `--showcase-*` tokens and the three
@@ -342,7 +342,7 @@ broken `fetch`.
 Recommended pipeline:
 
 ```bash
-npx @gltf-transform/cli optimize in.glb out.glb \
+bunx @gltf-transform/cli optimize in.glb out.glb \
   --compress meshopt --texture-compress webp --texture-size 2048 --simplify false
 ```
 
