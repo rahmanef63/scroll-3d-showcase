@@ -243,6 +243,11 @@ the scene settings and the copy — one row, one save. The public route never de
 read falls back to the slice defaults when the backend is unset, unreachable or
 empty, which is how this site is deployed today.
 
+## License
+
+MIT — see [`LICENSE`](./LICENSE). The bundled `.glb` files are generated assets
+of a real person's likeness; the licence covers the code, not the face.
+
 ## Deviations from the rr baseline
 
 | Rule | Status |
