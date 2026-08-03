@@ -3,12 +3,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const probe = vi.hoisted(() => ({
   createImageBitmapDuringParse: [] as unknown[],
   meshoptDecoders: [] as unknown[],
+  dracoLoaders: [] as unknown[],
+  dracoPaths: [] as string[],
 }));
 
 vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
   GLTFLoader: class {
     setMeshoptDecoder(decoder: unknown) {
       probe.meshoptDecoders.push(decoder);
+      return this;
+    }
+    setDRACOLoader(loader: unknown) {
+      probe.dracoLoaders.push(loader);
       return this;
     }
     parse(
@@ -26,6 +32,15 @@ vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
 
 vi.mock('three/examples/jsm/libs/meshopt_decoder.module.js', () => ({
   MeshoptDecoder: { __stub: 'meshopt' },
+}));
+
+vi.mock('three/examples/jsm/loaders/DRACOLoader.js', () => ({
+  DRACOLoader: class {
+    setDecoderPath(path: string) {
+      probe.dracoPaths.push(path);
+      return this;
+    }
+  },
 }));
 
 const { fetchModelBuffer, parseModel, ShowcaseLoadError } = await import('../lib/model-loader');
@@ -70,6 +85,10 @@ function stubBrokenFetch() {
 beforeEach(() => {
   probe.createImageBitmapDuringParse.length = 0;
   probe.meshoptDecoders.length = 0;
+  probe.dracoLoaders.length = 0;
+  // `dracoPaths` is deliberately NOT reset: it records constructions, and the
+  // decoder is a module-level singleton whose whole point is surviving between
+  // parses — clearing it here would hide a rebuild.
 });
 
 afterEach(() => {
@@ -137,5 +156,22 @@ describe('parseModel', () => {
   it('wires the meshopt decoder in as an ES module, never a fetched WASM file', async () => {
     await parseModel(new ArrayBuffer(4));
     expect(probe.meshoptDecoders).toEqual([{ __stub: 'meshopt' }]);
+  });
+
+  it('wires a Draco decoder too, from a path this site serves itself', async () => {
+    // A .glb that declares KHR_draco_mesh_compression does not degrade: the
+    // parser throws "No DRACOLoader instance provided" and the canvas stays
+    // black. Every generator emits Draco by default, so this is the common case.
+    await parseModel(new ArrayBuffer(4));
+    expect(probe.dracoLoaders).toHaveLength(1);
+    expect(probe.dracoPaths).toEqual(['/draco/']);
+  });
+
+  it('builds it once and hands the same one to every parse', async () => {
+    // It spins up worker threads; a fresh instance per model swap leaks a set.
+    await parseModel(new ArrayBuffer(4));
+    await parseModel(new ArrayBuffer(4));
+    expect(probe.dracoPaths).toHaveLength(1);
+    expect(new Set(probe.dracoLoaders).size).toBe(1);
   });
 });

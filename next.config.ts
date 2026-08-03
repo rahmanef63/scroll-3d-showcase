@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
     return [
       { source: '/(.*\\.(?:glb|gltf))', headers: [{ key: 'Cache-Control', value: ASSET }] },
       { source: '/docs/(.*\\.webp)', headers: [{ key: 'Cache-Control', value: ASSET }] },
+      // three's Draco decoder, vendored under public/draco/. Not `immutable`:
+      // the filenames are stable across three releases, so the bytes behind them
+      // change on an upgrade.
+      { source: '/draco/(.*)', headers: [{ key: 'Cache-Control', value: ASSET }] },
       { source: '/_next/static/media/(.*)', headers: [{ key: 'Cache-Control', value: IMMUTABLE }] },
     ];
   },

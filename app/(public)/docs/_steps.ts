@@ -79,7 +79,7 @@ before and after, then save the file and stop.`,
   {
     n: '05',
     title: 'Export a .glb that is ready to use',
-    body: 'Ask for glTF 2.0 binary, +Y up, transforms applied, no cameras, no lights, no animation, and a triangle budget you can defend over a mobile connection — 100k to 200k is comfortable, and this site ships 130k. One material and one texture atlas. Compression is worth the round trip: meshopt or Draco took the model on this page from ten megabytes to three and a half with nothing visible lost.',
+    body: 'Ask for glTF 2.0 binary, +Y up, transforms applied, no cameras, no lights, no animation, and a triangle budget you can defend over a mobile connection — 100k to 200k is comfortable. One material and one texture atlas. Compress it: both meshopt and Draco load here, and the model on this page went from ten megabytes to under two with nothing visible lost. Meshopt is marginally better on this site because its decoder ships inside the bundle, while Draco fetches one the first time a compressed model opens.',
   },
 ];
 

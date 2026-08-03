@@ -1,5 +1,11 @@
 import { Box3, Mesh, Vector3, type Object3D } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {
+  loadDraco,
+  loadMeshoptDecoder,
+  type DracoLoaderInstance,
+  type MeshoptDecoderModule,
+} from './decoders';
 import { ShowcaseLoadError } from './load-error';
 
 // Re-exported from where it has always lived: the class itself moved to a
@@ -61,30 +67,6 @@ export function fetchModelBuffer(
   });
 }
 
-type MeshoptDecoderModule = Parameters<GLTFLoader['setMeshoptDecoder']>[0];
-
-let decoderPromise: Promise<MeshoptDecoderModule | null> | null = null;
-
-/**
- * Loads the meshopt decoder for EXT_meshopt_compression.
- *
- * Meshopt rather than Draco on purpose: the Draco decoder is a separate WASM
- * file that DRACOLoader pulls in through three's FileLoader — the same
- * Request-object path that breaks under a patched `fetch`. Meshopt's decoder
- * is a plain ES module with the WASM inlined, so the bundler handles it and no
- * runtime fetch happens at all. Costs ~0.4 MB more on disk; worth it.
- */
-function loadMeshoptDecoder(): Promise<MeshoptDecoderModule | null> {
-  decoderPromise ??= import('three/examples/jsm/libs/meshopt_decoder.module.js')
-    .then((module) => module.MeshoptDecoder as MeshoptDecoderModule)
-    .catch((err: unknown) => {
-      // Uncompressed models still parse fine without it.
-      console.error('[scroll-3d-showcase:meshopt]', err);
-      return null;
-    });
-  return decoderPromise;
-}
-
 /**
  * Parses a GLB buffer with `ImageBitmapLoader` disabled.
  *
@@ -95,7 +77,12 @@ function loadMeshoptDecoder(): Promise<MeshoptDecoderModule | null> {
  * uses an `<img>` element instead.
  */
 export async function parseModel(buffer: ArrayBuffer, basePath = ''): Promise<GLTF> {
-  return parseWithoutImageBitmap(buffer, basePath, await loadMeshoptDecoder());
+  // Both, always: a GLB declares which one it needs in `extensionsRequired`, and
+  // the parser fails with "No DRACOLoader instance provided" rather than falling
+  // back if the one it asked for is absent. Neither decoder does any work — or
+  // any fetching — for a model that does not use it.
+  const [meshopt, draco] = await Promise.all([loadMeshoptDecoder(), loadDraco()]);
+  return parseWithoutImageBitmap(buffer, basePath, meshopt, draco);
 }
 
 /**
@@ -107,6 +94,7 @@ function parseWithoutImageBitmap(
   buffer: ArrayBuffer,
   basePath: string,
   decoder: MeshoptDecoderModule | null,
+  draco: DracoLoaderInstance | null,
 ): Promise<GLTF> {
   const globalScope = globalThis as { createImageBitmap?: unknown };
   const original = globalScope.createImageBitmap;
@@ -114,6 +102,7 @@ function parseWithoutImageBitmap(
   try {
     const loader = new GLTFLoader();
     if (decoder) loader.setMeshoptDecoder(decoder);
+    if (draco) loader.setDRACOLoader(draco);
     return new Promise<GLTF>((resolve, reject) => {
       loader.parse(buffer, basePath, resolve, (err) =>
         reject(new ShowcaseLoadError('MODEL_PARSE_FAILED', String(err))),

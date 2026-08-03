@@ -63,7 +63,8 @@ convex/                         models + presets tables, 3 queries, 4 mutations,
 lib/                            showcase-source (cached read), convex-server, studio-auth
 slices/scroll-3d-showcase/      the feature — see its README
                                 two entries: `/` renders, `/studio` edits
-public/*.glb                    the models (meshopt-compressed; originals in legacy-static/)
+public/*.glb                    the models (meshopt or Draco; originals in legacy-static/)
+public/draco/                   three's Draco decoder, vendored — see below
 scripts/audit-file-size.mjs     200-line cap
 .env.example                    the two optional env vars
 ```
@@ -72,9 +73,10 @@ The boot screen has its own line (`bootTitle`) so the loading moment can say
 something the tab should not — this deploy uses it for a joke about the model.
 `/`'s `<title>`, `<meta name="description">` and its Open Graph / Twitter card
 are all generated from the same saved copy, so renaming the site in the studio
-renames the tab, the search result and the link preview together. There is no OG
-image: the only art here is a WebGL scene, and a stale screenshot of a model
-that has since been swapped is worse than none.
+renames the tab, the search result and the link preview together. The card image
+is a real frame of the running scene — see *Preview images* — which is why it is
+regenerated rather than drawn: a link preview of the previous model is worse than
+none.
 
 Content lives in `app/(public)/_content/`; the slice ships no copy of its own,
 so the same engine can carry a different brand by swapping that folder. It is
@@ -312,6 +314,25 @@ runs before anything appears and how early the model starts downloading.
   revalidate; hashed font files get a year, immutable.
 - **`optimizePackageImports: ['three']`** resolves named imports to the modules
   that define them rather than walking the package barrel.
+
+## Compressed models
+
+Both geometry compressions load: **meshopt** (`EXT_meshopt_compression`) and
+**Draco** (`KHR_draco_mesh_compression`). Neither decoder is fetched for a model
+that does not use it.
+
+Meshopt is the better one to export — its decoder is an ES module with the WASM
+inlined, so the bundler carries it and no runtime fetch happens at all. Draco
+needs a decoder on disk, so three's is vendored into `public/draco/`
+(`draco_decoder.js`, `draco_decoder.wasm`, `draco_wasm_wrapper.js`, copied from
+`node_modules/three/examples/jsm/libs/draco/gltf/` at three 0.185.1). Re-copy
+them when three is upgraded. Self-hosted rather than pulled from gstatic for the
+same reason the fonts are: no third party in the critical path of the one asset
+this page exists to show.
+
+A model whose `extensionsRequired` names a decoder that is missing does not
+degrade — `GLTFLoader` throws `No DRACOLoader instance provided` and the canvas
+stays black — which is why both are wired on every parse.
 
 ## Preview images
 
