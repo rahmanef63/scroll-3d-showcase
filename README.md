@@ -134,7 +134,11 @@ What each toolbar action does:
   `public/` paths are permanent and cached for an hour plus a week of
   stale-while-revalidate, so without it every browser would go on serving the
   geometry it already had. Press SYNC after the deploy that carries the new file,
-  or nothing downstream learns the size changed.
+  or nothing downstream learns the size changed — and press it **in /studio**,
+  not from a terminal. The studio action calls `updateTag`, so `/` re-reads the
+  row within the second; `npx convex run models:sync` writes the same row and
+  leaves the page serving what it baked at build time, which then needs a
+  rebuild *on a new commit* to move.
 - **UPLOAD** is the other way in, and the only one that does not need a git
   checkout: the file goes from the browser straight into the backend's storage,
   no rebuild and no deploy. See *Uploads* below for what it costs and what it
