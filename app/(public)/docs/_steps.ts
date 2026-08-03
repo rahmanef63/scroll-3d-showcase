@@ -147,7 +147,7 @@ echo 'STUDIO_TOKEN=<password>' >> .env.local`,
   {
     n: '10',
     title: 'Ship it',
-    body: 'The Dockerfile builds a standalone server that any Node host runs. Set the same two variables there. With neither set the deploy still serves the bundled model and the default path, so a backend that is down or misconfigured can never take the page with it. Want no backend at all? COPY TS puts the tuned keyframe table on the clipboard in config/keyframes.ts shape — paste it in and the path ships inside the bundle.',
+    body: 'Two ways out: the Dockerfile builds a standalone server that any Node host runs, and the repo has a Vercel button that clones it and asks for the same two variables. convex/_generated is committed, so neither needs a codegen step. Set the same two variables wherever it lands. With neither set the deploy still serves the bundled model and the default path, so a backend that is down or misconfigured can never take the page with it. Want no backend at all? COPY TS puts the tuned keyframe table on the clipboard in config/keyframes.ts shape — paste it in and the path ships inside the bundle.',
   },
   {
     n: '11',

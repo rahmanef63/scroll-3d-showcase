@@ -5,6 +5,26 @@ keyframed points of interest under a sci-fi HUD.
 
 Built to rr conventions: the feature is a vertical slice, the app is a thin host.
 
+## Deploy your own
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frahmanef63%2Fscroll-3d-showcase&env=NEXT_PUBLIC_CONVEX_URL,STUDIO_TOKEN&envDescription=Convex%20deployment%20URL%20and%20the%20studio%20password&envLink=https%3A%2F%2Fgithub.com%2Frahmanef63%2Fscroll-3d-showcase%23readme)
+
+Order matters, because the second half of it is a shared secret:
+
+```bash
+bunx convex deploy                          # creates the deployment, prints its URL
+bunx convex env set STUDIO_TOKEN <password> # the backend's half
+```
+
+Then set `NEXT_PUBLIC_CONVEX_URL` to that URL and `STUDIO_TOKEN` to the same
+password in the host's environment, and open `/studio`. From there a model is an
+UPLOAD away — no second deploy, no repository. `convex/_generated` is committed,
+so the build needs no codegen step of its own.
+
+Skipping all of that is a supported outcome: with neither variable set the site
+builds and serves the bundled model on the default camera path, and `/studio`
+stays locked.
+
 ## Run it
 
 ```bash
