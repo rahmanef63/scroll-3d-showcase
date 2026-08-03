@@ -1,9 +1,9 @@
 {
   "slug": "scroll-3d-showcase",
   "name": "Scroll 3D Showcase",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "kind": "slice",
-  "description": "Scroll-driven 3D model showcase: the camera completes a 360\u00b0 orbit down the page, zooming into keyframed points of interest, with a game-style HUD over the top.",
+  "description": "Scroll-driven 3D model showcase: the camera completes a 360° orbit down the page, zooming into keyframed points of interest, with a game-style HUD over the top.",
   "whenToUse": "Talent, product or portfolio pages built around a single GLB where scrolling should feel like a camera move rather than a page scroll.",
   "tags": [
     "3d",
@@ -111,10 +111,11 @@
     "convexTables": []
   },
   "notes": [
-    "TODO(rr): confirm \u2014 slice.json/slice.manifest.json shape was written without access to the rr repo's schema. Run audit:slices and reshape if the validator disagrees.",
-    "0.6.0 rebuilt the studio's navigation \u2014 chrome / rail / tabbed panel / transport / path map \u2014 with no change to <ShowcaseStudio>'s props. Every editor surface is a fixed overlay bar, so the canvas stays full-bleed and what you tune is the frame a visitor scrolls through.",
+    "TODO(rr): confirm — slice.json/slice.manifest.json shape was written without access to the rr repo's schema. Run audit:slices and reshape if the validator disagrees.",
+    "0.6.0 rebuilt the studio's navigation — chrome / rail / tabbed panel / transport / path map — with no change to <ShowcaseStudio>'s props. Every editor surface is a fixed overlay bar, so the canvas stays full-bleed and what you tune is the frame a visitor scrolls through.",
     "The studio's two-level tab + mobile dock shape, its debounced undo stack, its uncontrolled sliders and its keyboard typing-guard are ported from the MIT-licensed framepilot editor. Code only: no dependency, styling, icon set or i18n came across.",
     "Loads the GLB over XHR rather than GLTFLoader.load(): three wraps URLs in a Request object, which extensions that patch window.fetch cannot structured-clone.",
-    "Uses meshopt rather than Draco for geometry compression \u2014 the Draco decoder is fetched at runtime and would reintroduce that same failure."
+    "Uses meshopt rather than Draco for geometry compression — the Draco decoder is fetched at runtime and would reintroduce that same failure.",
+    "0.12.0 added the studio's LIBRARY dialog — every model in one column, that model's whole preset as editable JSON in the other, with rename, publish, delete and delete-preset from inside it. Renames land on a new `label` column rather than `name`, because SYNC rewrites `name` from the scanned path on every run and a rename written there would silently revert."
   ]
 }

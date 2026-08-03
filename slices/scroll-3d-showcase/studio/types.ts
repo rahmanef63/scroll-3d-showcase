@@ -47,6 +47,11 @@ export interface ShowcasePreset {
  * The studio's only route to a backend, so the slice stays backend-agnostic.
  * Reads are deliberately absent: the host loads models and the preset in a
  * server component and passes them in as props.
+ *
+ * `loadPreset` is the one exception, and it is opt-in. The library's JSON column
+ * edits any model's preset, not just the open one, and the editor only ever
+ * holds one — passing all of them in as props would ship every keyframe of every
+ * row on every render to serve the one a person clicked.
  */
 export interface ShowcaseStudioAdapter {
   /** `missing` counts rows whose file the scan no longer finds. */
@@ -69,4 +74,47 @@ export interface ShowcaseStudioAdapter {
    * arriving through the filesystem scan.
    */
   uploadModel?(file: File): Promise<string>;
+  /**
+   * Renames a model for the picker without changing its id — the preset table
+   * joins on that id and nothing cascades. Optional; the library shows the name
+   * as read-only text when it is absent.
+   */
+  renameModel?(modelId: string, label: string): Promise<void>;
+  /**
+   * Drops a model's saved tuning, leaving the model itself alone. Optional: a
+   * host that never orphans a preset has nothing to sweep up.
+   */
+  deletePreset?(modelId: string): Promise<void>;
+  /**
+   * Reads back one model's saved preset; null means it was never saved. The one
+   * read on this interface — see the note above. Optional, and without it the
+   * library's JSON column only offers the model that is already open.
+   */
+  loadPreset?(modelId: string): Promise<ShowcasePreset | null>;
+}
+
+/** Props of `<ShowcaseStudio>`, here rather than beside it so the root stays wiring. */
+export interface ShowcaseStudioProps {
+  models: ShowcaseModel[];
+  modelId: string;
+  preset: ShowcasePreset;
+  adapter: ShowcaseStudioAdapter;
+  /** Model the public page renders. Omit when the host has no such concept. */
+  liveModelId?: string;
+  /**
+   * Section ids the host has rich blocks for. Omit and the COPY tab says nothing;
+   * supply it and a section whose id has drifted off one gets flagged, because
+   * the join is by id and the blocks otherwise vanish silently.
+   */
+  blockIds?: readonly string[];
+  /** Whole-copy presets, one per character. Absent renders no chips. */
+  contentPresets?: readonly ContentPreset[];
+  onSelectModel: (id: string) => void;
+  /**
+   * Re-reads the host's props in place. The library writes rows the host loaded
+   * server-side, and without this they stay stale until a navigation — which
+   * would close the dialog mid-edit. Omit and the library simply does not
+   * refresh; every write still lands.
+   */
+  onRefresh?: () => void;
 }

@@ -63,7 +63,23 @@ export default defineSchema({
   models: defineTable({
     /** Slug of the path under public/, assigned once and never reassigned. */
     modelId: v.string(),
+    /**
+     * What the scan saw — the path under public/, which is what keeps two
+     * nested files apart. `models.sync` rewrites it on every scan, so it is not
+     * somewhere a person's edit can survive.
+     */
     name: v.string(),
+    /**
+     * The studio's override of `name`, and the only one a rename writes. It is a
+     * separate column because SYNC patches `name` on every scanned row every
+     * time it runs: a rename written there would silently revert the next time
+     * anyone pressed SYNC. Unset means "use whatever the scan called it".
+     *
+     * `shape.ts:toModel` is the only reader that resolves the two. Any query
+     * that reaches for `row.name` directly gets the scan's value and will show
+     * a stale name — go through `toModel`.
+     */
+    label: v.optional(v.string()),
     /**
      * Path under public/ for a file the host scanned. Absent on an uploaded
      * model, whose URL is resolved from `storageId` at read time — storage URLs

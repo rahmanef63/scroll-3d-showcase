@@ -8,16 +8,12 @@ import { nearestKeyframeIndex } from './draft-utils';
 import { panelBodies } from './panel-bodies';
 import { PathMap } from './path-map';
 import { StudioChrome } from './studio-chrome';
+import { StudioLibrary } from './studio-library';
 import { StudioPanel } from './studio-panel';
 import { StudioRail } from './studio-rail';
 import { StudioStage } from './studio-stage';
 import { StudioTransport } from './studio-transport';
-import type {
-  ContentPreset,
-  ShowcaseModel,
-  ShowcasePreset,
-  ShowcaseStudioAdapter,
-} from './types';
+import type { ShowcaseStudioProps } from './types';
 import { useOrbitDrag } from './use-orbit-drag';
 import { useStudioActions } from './use-studio-actions';
 import { useStudioDraft } from './use-studio-draft';
@@ -26,24 +22,6 @@ import { useStudioHistory } from './use-studio-history';
 import { useStudioKeys } from './use-studio-keys';
 import { useStudioLayout } from './use-studio-layout';
 import { useStudioPlayback } from './use-studio-playback';
-
-export interface ShowcaseStudioProps {
-  models: ShowcaseModel[];
-  modelId: string;
-  preset: ShowcasePreset;
-  adapter: ShowcaseStudioAdapter;
-  /** Model the public page renders. Omit when the host has no such concept. */
-  liveModelId?: string;
-  /**
-   * Section ids the host has rich blocks for. Omit and the COPY tab says nothing;
-   * supply it and a section whose id has drifted off one gets flagged, because
-   * the join is by id and the blocks otherwise vanish silently.
-   */
-  blockIds?: readonly string[];
-  /** Whole-copy presets, one per character. Absent renders no chips. */
-  contentPresets?: readonly ContentPreset[];
-  onSelectModel: (id: string) => void;
-}
 
 /**
  * Camera-path editor rendered on top of a live <Scroll3DShowcase>. It owns the
@@ -64,6 +42,7 @@ export function ShowcaseStudio({
   blockIds,
   contentPresets,
   onSelectModel,
+  onRefresh,
 }: ShowcaseStudioProps) {
   const layout = useStudioLayout();
   const base = useStudioDraft(modelId, preset);
@@ -170,6 +149,18 @@ export function ShowcaseStudio({
         onSync={actions.sync} onUpload={actions.upload} onSave={actions.save} onCopy={actions.copy}
         onExport={actions.exportJson} onImport={actions.importJson}
       />
+
+      {/* A sibling of the stage, never inside it: the viewport frame sets
+          `transform: translateZ(0)` and would become the containing block of
+          anything `fixed` underneath it, trapping the dialog in the letterbox. */}
+      {layout.library && (
+        <StudioLibrary
+          onClose={layout.closeLibrary} models={models} modelId={modelId}
+          liveId={actions.liveId} draft={draft} adapter={adapter}
+          onSelectModel={onSelectModel} onUpload={actions.upload} onRefresh={onRefresh}
+          onPublished={actions.markLive}
+        />
+      )}
 
       {!layout.preview && (
         <>

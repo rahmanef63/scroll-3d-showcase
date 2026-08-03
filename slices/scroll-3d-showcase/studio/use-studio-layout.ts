@@ -22,11 +22,15 @@ export interface StudioLayout {
   preview: boolean;
   /** Output shape the framed viewport is letterboxed to. Ignored in preview. */
   aspect: AspectId;
+  /** The models + preset-JSON dialog. Mounted only while true, so it reads nothing when shut. */
+  library: boolean;
   /** Desktop: switch tab. Mobile: open that section, or close it if it is already the open one. */
   selectTab: (tab: StudioTab) => void;
   closeSheet: () => void;
   togglePanel: () => void;
   togglePreview: () => void;
+  toggleLibrary: () => void;
+  closeLibrary: () => void;
   setAspect: (aspect: AspectId) => void;
 }
 
@@ -44,6 +48,7 @@ export function useStudioLayout(): StudioLayout {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [library, setLibrary] = useState(false);
   // 16:9 rather than `fit`: the default should be a real output shape, or the
   // editor quietly goes back to previewing the editor window.
   const [aspect, setAspect] = useState<AspectId>('16:9');
@@ -65,10 +70,13 @@ export function useStudioLayout(): StudioLayout {
     panelCollapsed,
     preview,
     aspect,
+    library,
     selectTab,
     closeSheet: useCallback(() => setSheetOpen(false), []),
     togglePanel: useCallback(() => setPanelCollapsed((value) => !value), []),
     togglePreview: useCallback(() => setPreview((value) => !value), []),
+    toggleLibrary: useCallback(() => setLibrary((value) => !value), []),
+    closeLibrary: useCallback(() => setLibrary(false), []),
     setAspect,
   };
 }

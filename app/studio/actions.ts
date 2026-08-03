@@ -5,14 +5,14 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
-import { getConvex } from '@/lib/convex-server';
-import { SHOWCASE_TAG } from '@/lib/showcase-source';
-import { STUDIO_COOKIE, isStudioUnlocked, matchesStudioToken } from '@/lib/studio-auth';
+import { SHOWCASE_TAG, toMarkers } from '@/lib/showcase-source';
+import { STUDIO_COOKIE, matchesStudioToken } from '@/lib/studio-auth';
+import type { ShowcasePreset } from '@/slices/scroll-3d-showcase/studio';
+import { requireBackend, requireModelId, requireUnlocked } from './_lib/guards';
 import { sanitizePreset } from './_lib/sanitize-preset';
 import { scanPublicModels } from './_lib/scan-models';
 
 const SESSION_SECONDS = 60 * 60 * 8;
-const MODEL_ID = /^[a-z0-9-]{1,120}$/;
 
 export async function unlock(formData: FormData): Promise<void> {
   const password = formData.get('password');
@@ -120,24 +120,54 @@ export async function savePreset(modelId: string, preset: unknown): Promise<void
   updateTag(SHOWCASE_TAG);
 }
 
-function requireModelId(modelId: string): void {
-  if (typeof modelId !== 'string' || !MODEL_ID.test(modelId)) {
-    throw new Error(`Unknown model id: ${String(modelId).slice(0, 40)}`);
-  }
+/**
+ * Renames a model for the picker. Cosmetic-looking, but it is tagged: when the
+ * live model has no saved copy, the public page derives its title, boot title
+ * and meta description from the model's name, so a rename changes the browser
+ * tab, the search result and the link preview — all cached for a day otherwise.
+ */
+export async function renameModel(modelId: string, label: string): Promise<void> {
+  await requireUnlocked();
+  const { convex, token } = requireBackend();
+  requireModelId(modelId);
+  if (typeof label !== 'string') throw new Error('Missing label');
+
+  await convex.mutation(api.models.rename, { token, modelId, label });
+  updateTag(SHOWCASE_TAG);
 }
 
 /**
- * A server action is a public endpoint: the client-side gate in the studio UI is
- * not a gate, so every action re-checks the cookie before touching anything.
+ * Drops a model's saved tuning. The public page falls back to the slice defaults
+ * when a preset is absent, so this visibly changes `/` — hence the tag.
  */
-async function requireUnlocked(): Promise<void> {
-  if (!(await isStudioUnlocked())) throw new Error('Studio is locked');
+export async function deletePreset(modelId: string): Promise<void> {
+  await requireUnlocked();
+  const { convex, token } = requireBackend();
+  requireModelId(modelId);
+
+  await convex.mutation(api.presets.remove, { token, modelId });
+  updateTag(SHOWCASE_TAG);
 }
 
-function requireBackend() {
-  const convex = getConvex();
-  if (!convex) throw new Error('NEXT_PUBLIC_CONVEX_URL is not set — this deploy has no backend');
-  const token = process.env.STUDIO_TOKEN;
-  if (!token) throw new Error('STUDIO_TOKEN is not set — studio writes are disabled');
-  return { convex, token };
+/**
+ * Reads back one model's saved preset, for the library's JSON column.
+ *
+ * A read, so no tag. The content is returned exactly as stored rather than run
+ * through the public page's defaults: this column edits the row itself, and a
+ * defaulted field would be saved back as if someone had typed it.
+ */
+export async function loadPreset(modelId: string): Promise<ShowcasePreset | null> {
+  await requireUnlocked();
+  const { convex } = requireBackend();
+  requireModelId(modelId);
+
+  const saved = await convex.query(api.presets.get, { modelId });
+  if (!saved) return null;
+  return {
+    keyframes: saved.keyframes,
+    // Convex stores a marker position as a plain array; the slice wants a triple.
+    markers: toMarkers(saved.markers),
+    settings: saved.settings,
+    content: saved.content,
+  };
 }

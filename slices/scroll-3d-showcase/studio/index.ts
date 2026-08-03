@@ -14,11 +14,11 @@
  */
 
 export { ShowcaseStudio } from './showcase-studio';
-export type { ShowcaseStudioProps } from './showcase-studio';
 export { createMockStudioAdapter } from './mock-adapter';
 export type {
   ContentPreset,
   ShowcaseModel,
   ShowcasePreset,
   ShowcaseStudioAdapter,
+  ShowcaseStudioProps,
 } from './types';

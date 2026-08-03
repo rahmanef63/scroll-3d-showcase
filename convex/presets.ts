@@ -34,6 +34,36 @@ export const get = query({
   },
 });
 
+/**
+ * Drops a model's saved tuning.
+ *
+ * The broom for what `models.forget` leaves behind on purpose: forgetting a row
+ * keeps its preset so the same path coming back gets its shots with it, which
+ * means orphan preset rows are a designed outcome and nothing else deletes one.
+ *
+ * Deliberately not refused for the live model. `loadShowcase` falls back to the
+ * slice defaults plus the words derived from the model's name when a preset is
+ * absent, so the page goes untuned rather than broken — and the caller's confirm
+ * step is where that decision belongs, not here.
+ */
+export const remove = mutation({
+  args: { token: v.string(), modelId: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    requireStudioToken(args.token);
+    const row = await ctx.db
+      .query('presets')
+      .withIndex('by_modelId', (q) => q.eq('modelId', args.modelId))
+      .unique();
+    // A model that was never tuned has nothing to delete, and saying so as an
+    // error would make "clear this" fail on exactly the rows it is aimed at.
+    if (!row) return null;
+
+    await ctx.db.delete(row._id);
+    return null;
+  },
+});
+
 /** One row per modelId: upsert through the index rather than appending versions. */
 export const save = mutation({
   args: {

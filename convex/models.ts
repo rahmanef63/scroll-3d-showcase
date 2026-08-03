@@ -94,6 +94,38 @@ export const forget = mutation({
   },
 });
 
+/** A pasted path is a clumsy label, not a hostile one — same cap as an upload's. */
+const MAX_LABEL = 80;
+
+/**
+ * Renames a model for the picker, without touching what it *is*.
+ *
+ * The new name lands on `label`, never on `name`: SYNC patches `name` from the
+ * scanned path on every run, so a rename written there would vanish the next
+ * time anyone pressed it. `modelId` is untouchable for a harder reason — the
+ * presets table joins on it and nothing cascades, so reassigning it would strand
+ * a tuning session on a row nobody can reach.
+ *
+ * An empty label clears the override, which is how a model goes back to being
+ * called whatever the scan found.
+ */
+export const rename = mutation({
+  args: { token: v.string(), modelId: v.string(), label: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    requireStudioToken(args.token);
+    const row = await ctx.db
+      .query('models')
+      .withIndex('by_modelId', (q) => q.eq('modelId', args.modelId))
+      .unique();
+    if (!row) throw new Error(`Unknown model: ${args.modelId.slice(0, 40)}`);
+
+    const label = args.label.trim().slice(0, MAX_LABEL);
+    await ctx.db.patch(row._id, { label: label || undefined });
+    return null;
+  },
+});
+
 /**
  * Upsert from the host's fs scan of public/. Ids are assigned on first sight and
  * never reassigned; rows for files that vanished are kept and flagged rather than

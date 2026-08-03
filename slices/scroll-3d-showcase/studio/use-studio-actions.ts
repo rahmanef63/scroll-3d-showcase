@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { fromPreset } from './draft-utils';
 import { pickGlbFile, requireGlbFile } from './model-file';
 import { downloadJson, fromPresetFile, pickJsonFile, toPresetFile } from './preset-file';
 import { copyText, keyframesToSource } from './to-source';
 import type { ShowcaseStudioAdapter } from './types';
+import { useRunStatus } from './use-run-status';
 import type { StudioDraft } from './use-studio-draft';
 
 export interface StudioActions {
@@ -17,6 +18,12 @@ export interface StudioActions {
   needsApply: boolean;
   /** Model the public page renders, '' when nothing is published. */
   liveId: string;
+  /**
+   * Records a publish made somewhere else — the library has a PUBLISH chip per
+   * row. One latch for both paths, or the LIVE badge, the disabled chip and the
+   * delete guard name a different model than the one the site is serving.
+   */
+  markLive: (id: string) => void;
   sync: () => void;
   save: () => void;
   copy: () => void;
@@ -51,8 +58,6 @@ export interface UseStudioActionsArgs {
  */
 const REBUILD_KEYS = ['modelHeight', 'damping', 'parallax', 'bloom'] as const;
 
-const CLEAR_MS = 2500;
-
 /**
  * The studio's three backend-facing actions plus the scene-rebuild latch, kept
  * out of the composition root so it stays a wiring file.
@@ -65,13 +70,14 @@ export function useStudioActions({
   onForgotten,
   onUploaded,
 }: UseStudioActionsArgs): StudioActions {
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('');
+  const { busy, status, run } = useRunStatus();
   const [sceneEpoch, setSceneEpoch] = useState(0);
   // Publishing is a server write the host's props do not learn about until the
   // next load, and a chip still reading "not live" right after you published
   // reads as a failed click. Latched here instead: once set it stays correct
-  // across model switches, because that model really is the live one.
+  // across model switches, because that model really is the live one. Every
+  // publish in the editor writes this one latch — a second one inside the
+  // library would let the two paths disagree about what is live.
   const [published, setPublished] = useState('');
 
   // The showcase remounts exactly when this key changes, and reads draft.settings
@@ -83,26 +89,6 @@ export function useStudioActions({
 
   const needsApply = REBUILD_KEYS.some((key) => draft.settings[key] !== applied.settings[key]);
 
-  // A save that resolves after the studio unmounts must not leave a timer behind.
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => (timer.current ? clearTimeout(timer.current) : undefined), []);
-
-  const run = async (label: string, task: () => Promise<string>) => {
-    if (timer.current) clearTimeout(timer.current);
-    setBusy(true);
-    setStatus(`${label}…`);
-    try {
-      setStatus(await task());
-    } catch (error) {
-      setStatus(`FAILED: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      setBusy(false);
-      // The chrome's status slot is transient: a stale "SAVED" sitting next to a
-      // dirty dot reads as a lie, so it clears itself.
-      timer.current = setTimeout(() => setStatus(''), CLEAR_MS);
-    }
-  };
-
   const publish = adapter.setLiveModel;
   const drop = adapter.forgetModel;
   const store = adapter.uploadModel;
@@ -113,6 +99,7 @@ export function useStudioActions({
     sceneEpoch,
     needsApply,
     liveId: published || liveModelId,
+    markLive: setPublished,
     goLive: publish
       ? () =>
           void run('PUBLISHING', async () => {

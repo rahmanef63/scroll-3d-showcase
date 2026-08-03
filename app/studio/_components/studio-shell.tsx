@@ -73,6 +73,11 @@ export function StudioShell({
       contentPresets={CONTENT_PRESETS}
       adapter={{ ...adapter, uploadModel }}
       onSelectModel={(id) => router.push(`/studio?model=${encodeURIComponent(id)}`)}
+      // A refresh, not a push: the library writes rows this page loaded on the
+      // server, and a navigation would remount the tree through the Suspense
+      // boundary — closing the dialog and throwing away whatever was half typed
+      // into its JSON column. `loadStudio` is uncached, so this re-reads.
+      onRefresh={() => router.refresh()}
     />
   );
 }

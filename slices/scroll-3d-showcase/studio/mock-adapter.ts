@@ -13,5 +13,10 @@ export function createMockStudioAdapter(modelCount = 1): ShowcaseStudioAdapter {
     async savePreset(modelId, preset) {
       saved.set(modelId, preset);
     },
+    // Enough of a read for the library's JSON column to open on backend "none".
+    // Null is the honest answer for a model nobody has saved this session.
+    async loadPreset(modelId) {
+      return saved.get(modelId) ?? null;
+    },
   };
 }

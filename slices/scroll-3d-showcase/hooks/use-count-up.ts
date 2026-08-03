@@ -40,19 +40,11 @@ export function useCountUp(target: number, reducedMotion = false): number {
   const current = useRef(target);
 
   useEffect(() => {
-    if (reducedMotion) {
-      current.current = target;
-      setValue(target);
-      return;
-    }
-    if (current.current >= target) {
-      // Backwards only happens on a remount with a fresh model; take it whole.
-      if (current.current > target) {
-        current.current = target;
-        setValue(target);
-      }
-      return;
-    }
+    // Refs only in here. Every branch that used to setState now falls out of
+    // `shown` below instead: a state write in an effect body schedules a second
+    // render for a value the first one could already have computed.
+    if (reducedMotion || current.current > target) current.current = target;
+    if (reducedMotion || current.current >= target) return;
 
     let frame = 0;
     let last = performance.now();
@@ -67,5 +59,9 @@ export function useCountUp(target: number, reducedMotion = false): number {
     return () => cancelAnimationFrame(frame);
   }, [target, reducedMotion]);
 
-  return value;
+  // Clamped rather than stored: a target below what is on screen is a remount
+  // with a fresh model, and easing down would read as the download losing
+  // ground. Reduced motion takes the raw number, animation being the only thing
+  // this hook has to offer.
+  return reducedMotion ? target : Math.min(value, target);
 }

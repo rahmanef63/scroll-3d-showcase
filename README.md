@@ -94,7 +94,8 @@ under the chrome previews a composition no visitor gets. `PREVIEW` (`P`) drops
 the frame and every bar. Around the box:
 
 - **Chrome** across the top — model picker, `SYNC` / `SAVE` / `COPY TS` /
-  `EXPORT` / `IMPORT`, undo/redo, the unsaved dot, and the shortcut legend.
+  `EXPORT` / `IMPORT` / `LIBRARY`, undo/redo, the unsaved dot, and the shortcut
+  legend.
 - **Rail** down the left — one row per keyframe (index, `p`, label). Clicking a
   row seeks to it; `+` captures the camera at the current scroll position.
 - **Panel** on the right — four tabs: **SHOT** (the selected keyframe, as
@@ -107,9 +108,15 @@ the frame and every bar. Around the box:
 - **Keys** — `W/S` dolly, `A/D` orbit, `Q/E` duck-rise (hold them; `Shift` is
   3× faster), `1–9` select, `←/→` step, `Space` play, `F` focus, `Ctrl/Cmd+S`
   save, `Z` undo, `P` preview, `Esc` close.
+- **Library** — a dialog over the whole editor, opened by `LIBRARY` in the
+  chrome. Two columns: every model on the left, that model's entire preset as
+  editable JSON on the right. It is a native `<dialog>`, so it lands in the
+  browser's top layer above every bar the studio draws, traps focus while it is
+  open and closes on `Esc`. See *Library* below.
 - Below 1024px the rail flattens to a chip strip and the panel becomes a bottom
-  sheet with a `SHOT | COPY | MARKS | SCENE` dock, and the scene goes full-bleed
-  — there is no room to letterbox a phone.
+  sheet with a `SHOT | COPY | MARKS | SCENE` dock, the library becomes a bottom
+  drawer showing one column at a time, and the scene goes full-bleed — there is
+  no room to letterbox a phone.
 
 What each toolbar action does:
 
@@ -125,7 +132,8 @@ What each toolbar action does:
   `public/` reads `NO FILE` and cannot be published; if it was already live when
   the file went, `/` falls back to the bundled asset rather than serving a 404.
   **FORGET** appears beside it and drops the row for good; the saved preset is
-  left behind, so putting the file back gets the same id and its tuning with it. Syncing never changes what the
+  left behind, so putting the file back gets the same id and its tuning with it.
+  `LIBRARY` is where that orphaned preset can be swept up. Syncing never changes what the
   site shows — dropping a file into `public/` must not silently swap the hero —
   so publishing is its own explicit act. Nothing published means the site serves
   the bundled `rahman-3d.glb`, which is the state it ships in. `hitman.glb`
@@ -166,6 +174,43 @@ What each toolbar action does:
   A model with no preset at all gets its own title, boot line and description
   derived from its filename (`models/vintage-car.glb` → `VINTAGE CAR`), so two
   models never share one browser tab and one search result.
+
+### Library
+
+`LIBRARY` opens the one place where a model can be worked on without being the
+model you have open. Left column: every row the backend knows about, each with
+its read-only id under an editable name, plus `OPEN`, `PUBLISH`, `SET` (rename)
+and — only where the backend would actually allow it — `DELETE`. Right column:
+that row's whole preset as JSON, byte-for-byte the file `EXPORT` writes, so text
+copied out of the box is a valid `seed/` file and a `seed/` file pastes straight
+in. `APPLY` loads it into the draft (one undo away, nothing written), `SAVE`
+writes it to the backend for whichever row is selected, `DEFAULTS` fills the box
+without writing anything, and `DELETE PRESET` sweeps a row's tuning away.
+
+Three refusals worth knowing, because each one is the backend's:
+
+- **A model still sitting in `public/` has no `DELETE` button**, just a line
+  saying to delete the file and press `SYNC`. Deleting the row would only bring
+  it back on the next scan, and in the window between, its id could be handed to
+  a different file.
+- **`APPLY` is only offered for the model that is open.** The editor holds one
+  model's state, so applying another row's JSON would show a scene that does not
+  match the row. `SAVE` works on any row; `APPLY` does not.
+- **A rename never touches the model id.** The presets table joins on that id
+  and nothing cascades. The new name is stored separately from the scanned path,
+  which is why it survives a `SYNC` — writing it over the scanned name would
+  have it silently reverted the next time anyone pressed that button. Emptying
+  the field puts the scanned name back. The picker shows the rename; the id
+  beside it in the library is how you find the file on disk again.
+
+Typing in the JSON box never reaches the studio's shortcuts, and neither does
+anything else inside the dialog — `P`, `Z`, `Space` and `WASD` stop at its edge
+rather than driving the scene behind it. `Ctrl/Cmd+S` inside the dialog saves
+the JSON column. Everything the library writes goes through the same status
+line and the same `FAILED:` wording as the toolbar, and a rename or a preset
+delete invalidates the public page exactly like a `SAVE` does — a model's name
+is where `/`'s title, boot line and meta description come from when nobody has
+written any copy for it.
 
 Both env vars are optional and both fail closed — see `.env.example`. With
 neither set the site builds and renders exactly as it did before Convex existed,

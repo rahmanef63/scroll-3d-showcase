@@ -237,7 +237,11 @@ or any `contenteditable`.
 | `Z` (bare, or `Ctrl`/`Cmd`+`Z`) | Undo. |
 | `Shift`+`Z`, or `Y` | Redo. |
 | `P` | Toggle preview — drop the frame, hide all editor chrome. |
-| `Esc` | Close the mobile sheet. |
+| `Esc` | Close the mobile sheet, or the `LIBRARY` dialog when it is the thing that is open. |
+
+Every one of these is a `window` listener that stands down while a form control
+has focus, and stops at the edge of the `LIBRARY` dialog — so typing into a
+field or into that dialog's JSON box never drives the camera.
 
 ### The adapter
 
@@ -249,6 +253,10 @@ The adapter is the only seam a host has to fill:
 | `savePreset(modelId, preset)` | Persists keyframes, markers, settings and content. |
 | `setLiveModel(modelId)` *(optional)* | Points the public page at this model. Omit it and the `LIVE` chip disappears rather than becoming a dead button. |
 | `forgetModel(modelId)` *(optional)* | Drops a `missing` row for good. The `FORGET` chip only exists while a model is flagged, so it is absent on every healthy one. |
+| `uploadModel(file)` *(optional)* | Stores a `.glb` the visitor picked and returns the new model's id. Omit it and there is no `UPLOAD` chip. |
+| `renameModel(modelId, label)` *(optional)* | Renames a model for the picker without touching its id. Omit it and the library shows the name as read-only. |
+| `deletePreset(modelId)` *(optional)* | Drops a model's saved tuning, leaving the model itself alone. |
+| `loadPreset(modelId)` *(optional)* | Reads one model's saved preset back; `null` means it was never saved. |
 
 A `ShowcaseModel` may carry `missing: true` — the host still knows about it but
 its file is gone. The picker labels it `name · MISSING` and the chip reads
@@ -259,7 +267,10 @@ the tidiness.
 
 Reads are not in the adapter on purpose — the host loads `models` and `preset`
 itself and passes them in, so a server component can do it without shipping a
-database client to the browser. **COPY TS** emits the keyframe table in the exact
+database client to the browser. `loadPreset` is the one exception and it is
+opt-in: the `LIBRARY` dialog edits any model's preset, not just the open one, and
+passing all of them in as props would ship every keyframe of every row on every
+render to serve the one somebody clicked. **COPY TS** emits the keyframe table in the exact
 shape of `config/keyframes.ts`, which is how a tuned path leaves the editor and
 becomes code in a project that has no backend at all.
 
@@ -271,7 +282,8 @@ becomes code in a project that has no backend at all.
 | Chrome & layout | `use-studio-layout.ts`, `studio-chrome.tsx`, `studio-rail.tsx`, `studio-panel.tsx` |
 | Motion | `use-studio-playback.ts`, `use-studio-history.ts`, `use-studio-keys.ts`, `studio-transport.tsx`, `path-map.tsx` |
 | Fields | `field-slider.tsx`, `keyframe-fields.tsx`, `content-fields.tsx`, `marker-list.tsx`, `scene-fields.tsx`, `panel-bodies.tsx`, `studio-ui.tsx`, `presets.ts` |
-| State & host seam | `use-studio-draft.ts`, `draft-utils.ts`, `use-studio-actions.ts`, `use-orbit-drag.ts`, `to-source.ts`, `mock-adapter.ts`, `types.ts` |
+| Library | `studio-library.tsx`, `library-dialog.tsx`, `library-models.tsx`, `library-row.tsx`, `library-json.tsx`, `use-library-json.ts`, `use-model-actions.ts` |
+| State & host seam | `use-studio-draft.ts`, `draft-utils.ts`, `use-studio-actions.ts`, `use-run-status.ts`, `use-orbit-drag.ts`, `to-source.ts`, `mock-adapter.ts`, `types.ts` |
 
 Only `ShowcaseStudio`, `createMockStudioAdapter` and the three studio types are
 public; everything else in `studio/` stays behind the barrel.

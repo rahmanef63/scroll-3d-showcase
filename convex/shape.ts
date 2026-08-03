@@ -36,6 +36,8 @@ export function toUrl(path: string): string {
 interface ModelRow {
   modelId: string;
   name: string;
+  /** Studio rename. Wins over `name`, which every SYNC overwrites. */
+  label?: string;
   url?: string;
   storageId?: Id<'_storage'>;
   bytes: number;
@@ -50,12 +52,15 @@ interface ModelRow {
  * and a row that cached it would go stale the day that changes. A storage id
  * whose file is gone resolves to null, which is the same situation as a scanned
  * file that left public/: reported as missing rather than served as a 404.
+ *
+ * It is also the one place `label` beats `name`. Reading `row.name` anywhere
+ * else shows the scan's path and quietly ignores a rename.
  */
 export async function toModel(ctx: { storage: { getUrl: (id: Id<'_storage'>) => Promise<string | null> } }, row: ModelRow) {
   const url = row.storageId ? await ctx.storage.getUrl(row.storageId) : (row.url ?? '');
   return {
     id: row.modelId,
-    name: row.name,
+    name: row.label ?? row.name,
     url: url ?? '',
     bytes: row.bytes,
     uploaded: Boolean(row.storageId),

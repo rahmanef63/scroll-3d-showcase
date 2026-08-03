@@ -112,6 +112,19 @@ export function StudioChrome({
       </Chip>
       <ChromeFiles busy={busy} onCopy={onCopy} onExport={onExport} onImport={onImport} />
 
+      {/* Same family as the three above — where a preset lives and how it gets
+          edited — and the only place a rename or a delete has room to explain
+          itself. A <select> cannot hold buttons, so it could not go beside the
+          picker even if the bar had the width. */}
+      <Chip
+        onClick={layout.toggleLibrary}
+        active={layout.library}
+        title="Browse every model and edit its preset as JSON"
+      >
+        <span className="lg:hidden">LIB</span>
+        <span className="hidden lg:inline">LIBRARY</span>
+      </Chip>
+
       {/* A hairline arrow at 9px reads as an empty box, so these two opt out of
           LABEL's size — the only glyph-only chips in the bar. */}
       <Chip disabled={!canUndo} onClick={onUndo} title="Undo (Z)" className={GLYPH}>
