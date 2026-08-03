@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from 'next/cache';
 import type { Metadata } from 'next';
 import { SHOWCASE_TAG, loadShowcase } from '@/lib/showcase-source';
+import { SiteNav } from './_components/site-nav';
 import { TalentShowcase } from './_components/talent-showcase';
 
 /**
@@ -43,5 +44,10 @@ export default async function HomePage() {
 
   const showcase = await loadShowcase();
 
-  return <TalentShowcase {...showcase} />;
+  return (
+    <>
+      <TalentShowcase {...showcase} />
+      <SiteNav />
+    </>
+  );
 }

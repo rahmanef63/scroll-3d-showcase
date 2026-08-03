@@ -184,7 +184,7 @@ function StudioBoot() {
         <span className="absolute inset-y-0 left-0 w-1/5 animate-[showcase-sweep_1.1s_ease-in-out_infinite] bg-showcase-primary shadow-[0_0_14px_var(--showcase-primary)] motion-reduce:animate-none" />
       </div>
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-showcase-muted">
-        Memuat studio…
+        Loading the studio…
       </p>
     </Frame>
   );

@@ -23,6 +23,7 @@ npm run build && npm start
 app/
   (public)/
     page.tsx                    static route, "use cache"
+    docs/                       the clone-it-yourself guide, fully static
     error.tsx  not-found.tsx    route boundaries
     _components/                host wiring
     _content/                   copy.ts (the words) + sections.tsx (the rich blocks)
@@ -30,7 +31,7 @@ app/
   fonts/                        self-hosted Chakra Petch + JetBrains Mono
   globals.css                   theme tokens (CSS and WebGL read the same values)
 components/ui/                  vendored shadcn primitives
-convex/                         models + presets tables, 3 queries, 3 mutations
+convex/                         models + presets tables, 3 queries, 4 mutations, 1 seed
 lib/                            showcase-source (cached read), convex-server, studio-auth
 slices/scroll-3d-showcase/      the feature — see its README
                                 two entries: `/` renders, `/studio` edits
@@ -136,6 +137,14 @@ What each toolbar action does:
 Both env vars are optional and both fail closed — see `.env.example`. With
 neither set the site builds and renders exactly as it did before Convex existed,
 and `/studio` stays locked.
+
+## Docs
+
+`/docs` is the same story written for someone else's model: clone, drop a `.glb`
+into `public/`, wire the two env vars, tune, publish. It is a static page with no
+data behind it. Both routes reach it — the showcase carries a `DOCS` / `STUDIO`
+pair in the bottom right, and the studio's lock screen points anyone who lands on
+it at the repo and the guide rather than at a password they do not have.
 
 ## Stack
 
