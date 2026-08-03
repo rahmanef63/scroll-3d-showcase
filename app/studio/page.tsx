@@ -39,6 +39,14 @@ export const metadata: Metadata = {
 type SearchParams = Promise<{ model?: string; e?: string }>;
 
 /**
+ * Why the editor is looking at the bundled model instead of the backend's rows.
+ * '' means it is not — anything else is shown as a standing notice, because a
+ * studio that silently degrades looks identical to one that works until the
+ * first save fails.
+ */
+type Offline = '' | 'unset' | 'unreachable';
+
+/**
  * Bundled asset, so the studio opens even with zero env vars set. Id and URL
  * come from the public page's constants: editing a different id than `/` reads
  * would look like saving works while the live site never changes.
@@ -63,6 +71,7 @@ const FALLBACK = {
   modelId: FALLBACK_MODEL.id,
   preset: FALLBACK_PRESET,
   liveModelId: '',
+  offline: '' as Offline,
 };
 
 /**
@@ -84,18 +93,19 @@ async function StudioGate({ searchParams }: { searchParams: SearchParams }) {
   if (!(await isStudioUnlocked())) {
     return (
       <Frame>
-        <UnlockForm failed={e === '1'} />
+        <UnlockForm failed={e === '1'} disabled={e === 'off'} />
       </Frame>
     );
   }
 
-  const { models, modelId, preset, liveModelId } = await loadStudio(model);
+  const { models, modelId, preset, liveModelId, offline } = await loadStudio(model);
   return (
     <StudioShell
       models={models}
       modelId={modelId}
       preset={preset}
       liveModelId={liveModelId}
+      offline={offline}
       adapter={{
         syncModels,
         savePreset,
@@ -117,7 +127,7 @@ async function StudioGate({ searchParams }: { searchParams: SearchParams }) {
  */
 async function loadStudio(model: string | undefined) {
   const convex = getConvex();
-  if (!convex) return FALLBACK;
+  if (!convex) return { ...FALLBACK, offline: 'unset' as Offline };
 
   try {
     const [models, live] = await Promise.all([
@@ -140,9 +150,12 @@ async function loadStudio(model: string | undefined) {
       modelId,
       preset: saved ? toPreset(saved, untuned) : { ...FALLBACK_PRESET, content: untuned },
       liveModelId: live?.id ?? '',
+      offline: '' as Offline,
     };
   } catch {
-    return FALLBACK;
+    // Down, misconfigured or slow. Either way every write from here will fail,
+    // and the editor should say so before someone tunes a path for ten minutes.
+    return { ...FALLBACK, offline: 'unreachable' as Offline };
   }
 }
 

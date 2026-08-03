@@ -11,8 +11,12 @@ import type { StudioDraft } from './use-studio-draft';
 
 export interface StudioActions {
   busy: boolean;
-  /** '' when idle. Auto-clears 2.5s after a terminal message. */
+  /** '' when idle. A success clears itself; a failure waits to be read. */
   status: string;
+  /** `status` is a failure, not a receipt. */
+  failed: boolean;
+  /** Clears a failure once it has been read. */
+  dismiss: () => void;
   /** Part of the <Scroll3DShowcase> key. */
   sceneEpoch: number;
   needsApply: boolean;
@@ -70,7 +74,7 @@ export function useStudioActions({
   onForgotten,
   onUploaded,
 }: UseStudioActionsArgs): StudioActions {
-  const { busy, status, run } = useRunStatus();
+  const { busy, status, failed, run, dismiss } = useRunStatus();
   const [sceneEpoch, setSceneEpoch] = useState(0);
   // Publishing is a server write the host's props do not learn about until the
   // next load, and a chip still reading "not live" right after you published
@@ -96,6 +100,8 @@ export function useStudioActions({
   return {
     busy,
     status,
+    failed,
+    dismiss,
     sceneEpoch,
     needsApply,
     liveId: published || liveModelId,

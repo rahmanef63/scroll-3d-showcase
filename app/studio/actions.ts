@@ -15,6 +15,12 @@ import { scanPublicModels } from './_lib/scan-models';
 const SESSION_SECONDS = 60 * 60 * 8;
 
 export async function unlock(formData: FormData): Promise<void> {
+  // A deploy with no STUDIO_TOKEN is not a deploy with a different password:
+  // every attempt fails forever, and "Wrong password" sends the reader looking
+  // for a typo instead of at their environment. Saying which one is safe — the
+  // token itself is never in play.
+  if (!process.env.STUDIO_TOKEN) redirect('/studio?e=off');
+
   const password = formData.get('password');
   if (typeof password !== 'string' || !matchesStudioToken(password)) {
     redirect('/studio?e=1');

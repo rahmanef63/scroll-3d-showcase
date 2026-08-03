@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { ChromeFiles } from './chrome-files';
 import { ChromeModel } from './chrome-model';
+import { ChromeStatus } from './chrome-status';
 import { ASPECTS } from './presets';
 import { BAR, Chip, INPUT, LABEL, SURFACE } from './studio-ui';
 import type { ShowcaseModel } from './types';
@@ -16,6 +17,10 @@ export interface StudioChromeProps {
   busy: boolean;
   /** Transient action feedback, '' when idle. NEVER overwrites the legend — separate slot. */
   status: string;
+  /** `status` is a failure: it stays until read, and says so in the accent tone. */
+  failed?: boolean;
+  /** Clears a read failure. */
+  onDismiss?: () => void;
   canUndo: boolean;
   canRedo: boolean;
   layout: StudioLayout;
@@ -54,6 +59,8 @@ export function StudioChrome({
   dirty,
   busy,
   status,
+  failed,
+  onDismiss,
   canUndo,
   canRedo,
   layout,
@@ -166,27 +173,9 @@ export function StudioChrome({
         {LEGEND}
       </span>
 
-      <span className="ml-auto flex min-w-0 items-center gap-2 lg:ml-0 lg:shrink-0">
-        {/* Feedback slot, never the legend's: a failed save must be visible on a
-            phone too, where the legend is not rendered at all. */}
-        {status ? <span className="truncate text-showcase-fg">{status}</span> : null}
-        <span className={cn('shrink-0', dirty ? 'text-showcase-warn' : 'text-showcase-muted')}>
-          {dirty ? '●' : '○'}
-          <span className="hidden lg:inline">{dirty ? ' UNSAVED' : ' SAVED'}</span>
-        </span>
-      </span>
-
-      {/* The backend actions are round-trips with no progress to report. The
-          status slot says what is running; this says it still is — on a slow
-          link that is the difference between "working" and "broken". */}
-      {busy ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 block h-px overflow-hidden bg-showcase-line"
-        >
-          <span className="absolute inset-y-0 left-0 block w-1/5 animate-[showcase-sweep_1.1s_ease-in-out_infinite] bg-showcase-primary motion-reduce:animate-none" />
-        </span>
-      ) : null}
+      <ChromeStatus
+        busy={busy} status={status} failed={failed} dirty={dirty} onDismiss={onDismiss}
+      />
     </header>
   );
 }

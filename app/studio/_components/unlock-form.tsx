@@ -1,17 +1,21 @@
+'use client';
+
+import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { REPO_URL } from '@/app/(public)/docs/_steps';
 import { Button } from '@/components/ui/button';
 import { unlock } from '../actions';
 
 /**
- * Plain form post to the unlock action — no client JS, no state, and the token
- * only ever travels in the POST body.
+ * Form post to the unlock action: the token travels in the POST body and nowhere
+ * else — never a query, never client state. The only reason this is a client
+ * component at all is the pending label on the button.
  *
  * The note under it is the honest answer to what a visitor who finds this page
  * actually wants: the password is one person's, but the whole thing is theirs
  * to clone.
  */
-export function UnlockForm({ failed }: { failed: boolean }) {
+export function UnlockForm({ failed, disabled }: { failed: boolean; disabled: boolean }) {
   return (
     <div className="flex w-full max-w-sm flex-col gap-8">
       <form action={unlock} className="flex flex-col gap-4">
@@ -27,10 +31,14 @@ export function UnlockForm({ failed }: { failed: boolean }) {
           required
           className="h-9 rounded-md border border-border bg-card px-3 font-mono text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
-        <Button type="submit" className="font-mono text-xs uppercase tracking-[0.2em]">
-          Unlock
-        </Button>
-        {failed ? (
+        <SubmitButton />
+        {/* Two different failures, and conflating them sends the reader hunting
+            for a typo in a password that was never going to work. */}
+        {disabled ? (
+          <p className="font-mono text-xs text-showcase-warn" role="alert">
+            The studio is switched off on this deploy — STUDIO_TOKEN is not set.
+          </p>
+        ) : failed ? (
           <p className="font-mono text-xs text-showcase-accent" role="alert">
             Wrong password.
           </p>
@@ -63,5 +71,24 @@ export function UnlockForm({ failed }: { failed: boolean }) {
         </p>
       </div>
     </div>
+  );
+}
+
+/**
+ * The form posts to a server action, which on a slow link leaves the button
+ * looking untouched — so it says what it is doing and refuses a second click.
+ * `useFormStatus` has to read the form from a child of it, which is the only
+ * reason this is its own component.
+ */
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="font-mono text-xs uppercase tracking-[0.2em]"
+    >
+      {pending ? 'Checking…' : 'Unlock'}
+    </Button>
   );
 }

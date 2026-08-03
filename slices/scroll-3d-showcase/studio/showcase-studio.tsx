@@ -142,6 +142,7 @@ export function ShowcaseStudio({
       <StudioChrome
         models={models} modelId={modelId} layout={layout} dirty={draft.dirty}
         busy={actions.busy} status={actions.status}
+        failed={actions.failed} onDismiss={actions.dismiss}
         canUndo={history.canUndo} canRedo={history.canRedo}
         isLive={actions.liveId === modelId} missing={Boolean(model?.missing)}
         uploaded={Boolean(model?.uploaded)} onGoLive={actions.goLive} onForget={actions.forget}
