@@ -40,7 +40,7 @@ async function load(url?: string) {
 // Compared by value, not identity: `vi.resetModules()` hands the re-imported
 // graph its own copy of the slice constants.
 const expectDefaults = (source: Awaited<ReturnType<typeof load>>) => {
-  expect(source.modelUrl).toBe('/hitman.glb');
+  expect(source.modelUrl).toBe('/rahman-3d.glb');
   expect(source.keyframes).toEqual(DEFAULT_KEYFRAMES);
   expect(source.markers).toEqual(DEFAULT_MARKERS);
   expect(source.settings).toEqual(DEFAULT_SCENE_SETTINGS);
@@ -110,7 +110,7 @@ describe('loadShowcase with a backend', () => {
 
     // Nothing published, so it reads the bundled asset's preset.
     const [, args] = probe.query.mock.calls[1];
-    expect(args).toEqual({ modelId: 'hitman' });
+    expect(args).toEqual({ modelId: 'rahman-3d' });
     expect(source.modelUrl).toBe(ACTIVE_MODEL_URL);
   });
 
@@ -131,7 +131,7 @@ describe('loadShowcase with a backend', () => {
     expect(source.modelUrl).toBe('/car.glb');
     expect(source.keyframes).toEqual(DEFAULT_KEYFRAMES);
     // And on its own words: the tab, the search result and the boot screen
-    // used to read HITMAN for every model but the two written by hand.
+    // used to read the bundled model's title for every file that had no preset.
     expect(source.content.title).toBe('CAR');
   });
 
@@ -145,11 +145,13 @@ describe('loadShowcase with a backend', () => {
 });
 
 describe('contentForModel', () => {
-  it('keeps the hand-written copy for a model that has some', () => {
-    expect(contentForModel({ id: 'hitman', name: 'hitman' })).toBe(DEFAULT_CONTENT);
+  it('derives from the file rather than a table of ids', () => {
+    // No entry to add when a .glb lands in public/: the words come from the
+    // file, and the real copy comes from its preset row.
+    expect(contentForModel({ id: 'hitman', name: 'hitman' }).title).toBe('HITMAN');
   });
 
-  it('names an unknown file after itself, not after the first character', () => {
+  it('names an unknown file after itself, not after the bundled model', () => {
     const content = contentForModel({ id: 'models-vintage-car', name: 'models/vintage-car' });
     expect(content.title).toBe('VINTAGE CAR');
     expect(content.bootTitle).toBe('VINTAGE CAR');

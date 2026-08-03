@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "modelId": "rahman-3d",
+  "keyframes": [
+    {
+      "p": 0,
+      "azimuth": -20,
+      "elevation": 2,
+      "radius": 3.3,
+      "targetX": 0,
+      "targetY": 0.02,
+      "targetZ": 0,
+      "screenShiftX": 0.42,
+      "fov": 38,
+      "label": "FULL BODY"
+    },
+    {
+      "p": 0.18,
+      "azimuth": 38,
+      "elevation": 1,
+      "radius": 0.42,
+      "targetX": 0,
+      "targetY": 0.765,
+      "targetZ": 0.1,
+      "screenShiftX": 0.38,
+      "fov": 34,
+      "label": "SHADES"
+    },
+    {
+      "p": 0.42,
+      "azimuth": 198,
+      "elevation": 4,
+      "radius": 0.85,
+      "targetX": 0,
+      "targetY": 0.52,
+      "targetZ": -0.04,
+      "screenShiftX": -0.4,
+      "fov": 36,
+      "label": "SUIT"
+    },
+    {
+      "p": 0.64,
+      "azimuth": 252,
+      "elevation": -10,
+      "radius": 0.68,
+      "targetX": -0.24,
+      "targetY": -0.17,
+      "targetZ": 0.14,
+      "screenShiftX": 0.72,
+      "fov": 36,
+      "label": "SIDEARM"
+    },
+    {
+      "p": 0.85,
+      "azimuth": 312,
+      "elevation": -16,
+      "radius": 0.6,
+      "targetX": 0,
+      "targetY": -0.78,
+      "targetZ": 0.03,
+      "screenShiftX": -0.38,
+      "fov": 36,
+      "label": "SHOES"
+    },
+    {
+      "p": 1,
+      "azimuth": 340,
+      "elevation": 4,
+      "radius": 3.6,
+      "targetX": 0,
+      "targetY": 0.02,
+      "targetZ": 0,
+      "screenShiftX": -0.45,
+      "fov": 38,
+      "label": "FULL BODY"
+    }
+  ],
+  "markers": [
+    {
+      "name": "SHADES",
+      "position": [
+        0,
+        0.77,
+        0.13
+      ]
+    },
+    {
+      "name": "SUIT",
+      "position": [
+        -0.2,
+        0.55,
+        0.1
+      ]
+    },
+    {
+      "name": "SIDEARM",
+      "position": [
+        -0.25,
+        -0.17,
+        0.15
+      ]
+    },
+    {
+      "name": "SHOES",
+      "position": [
+        0,
+        -0.8,
+        0.14
+      ]
+    }
+  ],
+  "settings": {
+    "modelHeight": 1.8,
+    "scrollLength": 7.6,
+    "damping": 0.075,
+    "parallax": 0.1,
+    "bloom": true
+  },
+  "content": {
+    "title": "RAHMAN",
+    "bootTitle": "ini yang nulis briefnya",
+    "brand": "SELF PORTRAIT",
+    "description": "Scroll-driven 3D showcase. This time the model is supposed to look like this.",
+    "sections": [
+      {
+        "id": "r1",
+        "name": "Intro",
+        "progress": 0,
+        "fadeIn": -0.12,
+        "fadeOut": 0.26,
+        "align": "start",
+        "kicker": "Self portrait // approved by exactly one person",
+        "heading": "RAH|MAN",
+        "body": "Second attempt. This time I stopped describing someone else and described myself, which is a lower bar and it still took three tries. The glasses are right, the jacket is right, and the hair is doing something I have never once managed in real life. Same scroll, same camera, different face. If you own a product, it goes here instead — that has always been the point."
+      },
+      {
+        "id": "r2",
+        "name": "Build",
+        "progress": 0.42,
+        "fadeIn": 0.32,
+        "fadeOut": 0.52,
+        "align": "end",
+        "kicker": "r2 — The numbers",
+        "heading": "Ten megabytes\nof me",
+        "body": "That is what came out of the exporter: 130 thousand triangles and three 4K texture atlases, which is a lot of file for one man standing still. Compressed it down to a third without touching what you can see. The version you just loaded is the small one — the big one is still on my disk, doing nothing."
+      },
+      {
+        "id": "r3",
+        "name": "Prop",
+        "progress": 0.64,
+        "fadeIn": 0.56,
+        "fadeOut": 0.74,
+        "align": "start",
+        "kicker": "r3 — Still armed, apparently",
+        "heading": "I did not ask\nfor this either",
+        "body": "Different generator, same instinct: put a gun in his hand. I left it in for continuity. It is also still the clearest demo of the thing this page actually sells — the camera can hold on any small object at any angle, and the object does not have to be a weapon. Swap the .glb, move one keyframe."
+      },
+      {
+        "id": "r4",
+        "name": "Contact",
+        "progress": 0.85,
+        "fadeIn": 0.79,
+        "fadeOut": 1.14,
+        "align": "end",
+        "kicker": "r4 — Contact",
+        "heading": "Now you know\nwhat I look like",
+        "body": "Roughly. The polygons are generous around the jaw and I am not correcting them. Everything below is real and answers faster than the model does."
+      }
+    ]
+  }
+}

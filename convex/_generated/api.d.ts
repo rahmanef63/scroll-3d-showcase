@@ -11,6 +11,7 @@
 import type * as lib from "../lib.js";
 import type * as models from "../models.js";
 import type * as presets from "../presets.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -22,6 +23,7 @@ declare const fullApi: ApiFromModules<{
   lib: typeof lib;
   models: typeof models;
   presets: typeof presets;
+  seed: typeof seed;
 }>;
 
 /**

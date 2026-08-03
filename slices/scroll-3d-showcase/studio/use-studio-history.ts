@@ -155,6 +155,9 @@ export function useStudioHistory(base: StudioDraft, resetKey: string): StudioHis
       setContent: step(base.setContent, 0),
       addSection: step(base.addSection, 0),
       removeSection: step(base.removeSection, 0),
+      // Wholesale replacement — a JSON import. Wrapped like any other edit so
+      // one undo puts the model's own preset back.
+      restore: step(base.restore, 0),
     },
     canUndo: range.index > 0,
     canRedo: range.index >= 0 && range.index < range.length - 1,

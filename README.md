@@ -64,8 +64,8 @@ so a shot only reads correctly at the aspect it will be seen at, and a canvas
 under the chrome previews a composition no visitor gets. `PREVIEW` (`P`) drops
 the frame and every bar. Around the box:
 
-- **Chrome** across the top — model picker, `SYNC` / `SAVE` / `COPY TS`,
-  undo/redo, the unsaved dot, and the shortcut legend.
+- **Chrome** across the top — model picker, `SYNC` / `SAVE` / `COPY TS` /
+  `EXPORT` / `IMPORT`, undo/redo, the unsaved dot, and the shortcut legend.
 - **Rail** down the left — one row per keyframe (index, `p`, label). Clicking a
   row seeks to it; `+` captures the camera at the current scroll position.
 - **Panel** on the right — four tabs: **SHOT** (the selected keyframe, as
@@ -94,7 +94,7 @@ What each toolbar action does:
   left behind, so putting the file back gets the same id and its tuning with it. Syncing never changes what the
   site shows — dropping a file into `public/` must not silently swap the hero —
   so publishing is its own explicit act. Nothing published means the site serves
-  the bundled `hitman.glb`, which is the state it ships in. A model published
+  the bundled `rahman-3d.glb`, which is the state it ships in. A model published
   before anyone has tuned it renders on the default camera path rather than
   quietly keeping the old one on screen.
 - Drag the canvas to orbit, wheel to dolly, tune any field, then **SAVE** — the
@@ -102,14 +102,32 @@ What each toolbar action does:
 - **COPY TS** puts the tuned table on the clipboard in `config/keyframes.ts`
   shape, so a path can be baked back into code and shipped without a backend.
   Camera only — copy is not part of that export.
+- **EXPORT** downloads the whole preset — path, markers, scene knobs and every
+  word — as `<model-id>.json`. **IMPORT** reads one back into whatever model is
+  open, which is the point: a preset belongs to one model id, so swapping the
+  `.glb` would strand its tuning otherwise. An import lands in the draft, so it
+  is one undo away and nothing reaches the live site until `SAVE`. Files under
+  `seed/` are exactly these files, and `convex/seed.ts` writes one straight into
+  the backend:
+
+  ```sh
+  npx convex run seed:preset "$(cat seed/rahman-3d.json)"          # dev
+  npx convex run seed:preset --prod "$(cat seed/rahman-3d.json)"   # production
+  ```
+
+  It refuses to overwrite a preset that already exists unless the file carries
+  `"force": true`, so re-running it can never eat a tuning session.
 - The **COPY** tab edits the words. A `CHARACTER` row at the top loads a whole
-  set in one click — this site ships two, `KEANU` and `RAHMAN`, each with its own
+  set in one click — this site ships two, `RAHMAN` and `KEANU`, each with its own
   section ids so neither inherits the other's stat grid. Loading one is a single
   undo step and does not change which model is live. Typing a title updates the HUD wordmark as
   you go; saving it renames the browser tab and the search result too, because
   `/`'s `generateMetadata` reads the same source. Panels can be added at the
   current scroll position and deleted. A saved row with no copy at all — every
   preset written before 0.7.0 — keeps this site's defaults rather than blanking.
+  A model with no preset at all gets its own title, boot line and description
+  derived from its filename (`models/vintage-car.glb` → `VINTAGE CAR`), so two
+  models never share one browser tab and one search result.
 
 Both env vars are optional and both fail closed — see `.env.example`. With
 neither set the site builds and renders exactly as it did before Convex existed,
@@ -121,7 +139,7 @@ Next.js 16.2 (App Router, Cache Components) · React 19 · Tailwind v4 ·
 TypeScript strict · three 0.185 · Vitest.
 
 Convex covers exactly two tables (`models`, `presets`) behind three public
-queries and three token-guarded mutations. A preset carries the camera path, the markers,
+queries, four token-guarded mutations and one internal seed mutation. A preset carries the camera path, the markers,
 the scene settings and the copy — one row, one save. The public route never depends on it: every
 read falls back to the slice defaults when the backend is unset, unreachable or
 empty, which is how this site is deployed today.

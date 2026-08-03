@@ -168,6 +168,7 @@ export function ShowcaseStudio({
         onGoLive={actions.goLive} onForget={actions.forget}
         onSelectModel={onSelectModel} onUndo={undo} onRedo={redo}
         onSync={actions.sync} onSave={actions.save} onCopy={actions.copy}
+        onExport={actions.exportJson} onImport={actions.importJson}
       />
 
       {!layout.preview && (

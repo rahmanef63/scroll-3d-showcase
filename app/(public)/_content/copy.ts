@@ -159,32 +159,25 @@ export interface ContentPreset {
 }
 
 export const CONTENT_PRESETS: readonly ContentPreset[] = [
-  { id: 'keanu', label: 'KEANU', content: KEANU },
   { id: 'rahman', label: 'RAHMAN', content: RAHMAN },
+  { id: 'keanu', label: 'KEANU', content: KEANU },
 ];
 
-/** What a deploy with no saved copy renders. */
-export const DEFAULT_CONTENT = KEANU;
-
-/** Keyed by the id `models.sync` assigns to the file, not by the preset ids above. */
-const BY_MODEL_ID: Readonly<Record<string, ShowcaseContent>> = {
-  hitman: KEANU,
-  'rahman-3d': RAHMAN,
-};
+/** What a deploy with no backend and no saved copy renders — the bundled model's own. */
+export const DEFAULT_CONTENT = RAHMAN;
 
 /**
- * The words a synced model starts with, before anyone opens /studio.
+ * The words a synced model starts with, before anything is saved for it.
  *
- * Every .glb gets its own title, boot line and description: sharing one
- * headline — one browser tab, one search result — across models reads as a bug,
- * and used to happen to every file but the two written by hand. The panels stay
- * the default ones, because they are timed to the camera path and a saved
- * preset overrides all of this anyway.
+ * Derived from the file, not from a table of ids: a .glb dropped into public/
+ * tomorrow gets its own title, boot line and description without anyone editing
+ * this file. Per-model copy is data — it lives in the preset row, written from
+ * /studio or seeded from a JSON file under seed/ — and this is only what shows
+ * before that exists. The panels stay the default ones, because they are timed
+ * to the camera path.
  */
 export function contentForModel(model?: { id: string; name: string } | null): ShowcaseContent {
   if (!model) return DEFAULT_CONTENT;
-  const known = BY_MODEL_ID[model.id];
-  if (known) return known;
 
   // 'models/vintage-car' -> 'VINTAGE CAR'; the id covers a name of separators.
   const title =

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { fromPreset } from './draft-utils';
+import { downloadJson, fromPresetFile, pickJsonFile, toPresetFile } from './preset-file';
 import { copyText, keyframesToSource } from './to-source';
 import type { ShowcaseStudioAdapter } from './types';
 import type { StudioDraft } from './use-studio-draft';
@@ -17,6 +19,10 @@ export interface StudioActions {
   sync: () => void;
   save: () => void;
   copy: () => void;
+  /** Downloads the draft as JSON — the file `import` reads back. */
+  exportJson: () => void;
+  /** Loads a JSON file into the draft. Nothing is written until SAVE. */
+  importJson: () => void;
   applyScene: () => void;
   /** Undefined when the adapter cannot publish; the chrome hides the chip then. */
   goLive?: () => void;
@@ -143,6 +149,27 @@ export function useStudioActions({
           ? 'COPIED TS TABLE'
           : 'CLIPBOARD BLOCKED',
       ),
+    exportJson: () =>
+      void run('EXPORTING', async () => {
+        const preset = {
+          keyframes: draft.keyframes,
+          markers: draft.markers,
+          settings: draft.settings,
+          content: draft.content,
+        };
+        downloadJson(`${modelId || 'preset'}.json`, toPresetFile(modelId, preset));
+        return 'EXPORTED JSON';
+      }),
+    importJson: () =>
+      void run('IMPORTING', async () => {
+        const text = await pickJsonFile();
+        if (text === null) return 'IMPORT CANCELLED';
+        const { modelId: from, preset } = fromPresetFile(text);
+        // Into the draft, not the backend: a bad import is one undo away, and
+        // nothing reaches the live site until SAVE.
+        draft.restore({ ...fromPreset(preset), selected: 0 });
+        return from && from !== modelId ? `IMPORTED ${from.toUpperCase()}` : 'IMPORTED JSON';
+      }),
     // Only the epoch moves: refreshing the baseline falls out of `sceneKey`.
     applyScene: () => setSceneEpoch((epoch) => epoch + 1),
   };

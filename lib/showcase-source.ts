@@ -24,10 +24,10 @@ export const SHOWCASE_TAG = 'showcase';
  * pressing SYNC must never silently swap the site's hero. Publishing is an
  * explicit act (`LIVE` in the studio); this is what the site shows until then.
  *
- * The value is the ID RULE slug of `public/hitman.glb`.
+ * The value is the ID RULE slug of `public/rahman-3d.glb`.
  */
-export const ACTIVE_MODEL_ID = 'hitman';
-export const ACTIVE_MODEL_URL = '/hitman.glb';
+export const ACTIVE_MODEL_ID = 'rahman-3d';
+export const ACTIVE_MODEL_URL = '/rahman-3d.glb';
 
 /**
  * The wire carries marker positions as `number[]`; the mutation already rejects

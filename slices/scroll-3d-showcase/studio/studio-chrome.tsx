@@ -27,6 +27,10 @@ export interface StudioChromeProps {
   onSync: () => void;
   onSave: () => void;
   onCopy: () => void;
+  /** Downloads the draft as JSON. */
+  onExport: () => void;
+  /** Loads a JSON file into the draft — survives a model swap. */
+  onImport: () => void;
   /** Absent when the adapter cannot publish — the chip is not rendered at all. */
   onGoLive?: () => void;
   /** Absent when the adapter cannot forget. Only shown for a missing model. */
@@ -55,6 +59,8 @@ export function StudioChrome({
   onSync,
   onSave,
   onCopy,
+  onExport,
+  onImport,
   onGoLive,
   onForget,
 }: StudioChromeProps) {
@@ -97,6 +103,22 @@ export function StudioChrome({
       >
         <span className="lg:hidden">TS</span>
         <span className="hidden lg:inline">COPY TS</span>
+      </Chip>
+
+      {/* The pair that survives a model swap: a preset belongs to one model id,
+          so swapping the .glb strands its tuning unless it can leave as a file
+          and come back on the other side. */}
+      <Chip disabled={busy} onClick={onExport} title="Download this preset as a JSON file">
+        <span className="lg:hidden">EXP</span>
+        <span className="hidden lg:inline">EXPORT</span>
+      </Chip>
+      <Chip
+        disabled={busy}
+        onClick={onImport}
+        title="Load a preset JSON into this model — SAVE still has to be pressed"
+      >
+        <span className="lg:hidden">IMP</span>
+        <span className="hidden lg:inline">IMPORT</span>
       </Chip>
 
       {/* A hairline arrow at the bar's 9px reads as an empty box, so these two

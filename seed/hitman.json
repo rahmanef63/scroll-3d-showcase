@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "modelId": "hitman",
+  "keyframes": [
+    {
+      "p": 0,
+      "azimuth": -20,
+      "elevation": 2,
+      "radius": 3.3,
+      "targetX": 0,
+      "targetY": 0.02,
+      "targetZ": 0,
+      "screenShiftX": 0.42,
+      "fov": 38,
+      "label": "FULL BODY"
+    },
+    {
+      "p": 0.18,
+      "azimuth": 38,
+      "elevation": 1,
+      "radius": 0.42,
+      "targetX": 0,
+      "targetY": 0.765,
+      "targetZ": 0.1,
+      "screenShiftX": 0.38,
+      "fov": 34,
+      "label": "SHADES"
+    },
+    {
+      "p": 0.42,
+      "azimuth": 198,
+      "elevation": 4,
+      "radius": 0.85,
+      "targetX": 0,
+      "targetY": 0.52,
+      "targetZ": -0.04,
+      "screenShiftX": -0.4,
+      "fov": 36,
+      "label": "SUIT"
+    },
+    {
+      "p": 0.64,
+      "azimuth": 252,
+      "elevation": -10,
+      "radius": 0.68,
+      "targetX": -0.24,
+      "targetY": -0.17,
+      "targetZ": 0.14,
+      "screenShiftX": 0.72,
+      "fov": 36,
+      "label": "SIDEARM"
+    },
+    {
+      "p": 0.85,
+      "azimuth": 312,
+      "elevation": -16,
+      "radius": 0.6,
+      "targetX": 0,
+      "targetY": -0.78,
+      "targetZ": 0.03,
+      "screenShiftX": -0.38,
+      "fov": 36,
+      "label": "SHOES"
+    },
+    {
+      "p": 1,
+      "azimuth": 340,
+      "elevation": 4,
+      "radius": 3.6,
+      "targetX": 0,
+      "targetY": 0.02,
+      "targetZ": 0,
+      "screenShiftX": -0.45,
+      "fov": 38,
+      "label": "FULL BODY"
+    }
+  ],
+  "markers": [
+    {
+      "name": "SHADES",
+      "position": [
+        0,
+        0.77,
+        0.13
+      ]
+    },
+    {
+      "name": "SUIT",
+      "position": [
+        -0.2,
+        0.55,
+        0.1
+      ]
+    },
+    {
+      "name": "SIDEARM",
+      "position": [
+        -0.25,
+        -0.17,
+        0.15
+      ]
+    },
+    {
+      "name": "SHOES",
+      "position": [
+        0,
+        -0.8,
+        0.14
+      ]
+    }
+  ],
+  "settings": {
+    "modelHeight": 1.8,
+    "scrollLength": 7.6,
+    "damping": 0.075,
+    "parallax": 0.1,
+    "bloom": true
+  },
+  "content": {
+    "title": "HITMAN",
+    "bootTitle": "ini keanu wanna be",
+    "brand": "CONCEPT DEMO",
+    "description": "Scroll-driven 3D showcase. The model is AI-generated and it shows.",
+    "sections": [
+      {
+        "id": "01",
+        "name": "Intro",
+        "progress": 0,
+        "fadeIn": -0.12,
+        "fadeOut": 0.26,
+        "align": "start",
+        "kicker": "Concept demo // nobody real signed off on this",
+        "heading": "HIT|MAN",
+        "body": "Okay, listen. This was supposed to be Keanu. The one with the dog and the pencil. I typed the brief, the generator thought about it for eleven seconds, and handed back — this. I’m not fixing it. You’re not here for the face anyway, you’re here because the camera does a thing when you scroll, and apparently that still impresses people. Put your own product in this slot. Sunglasses. A watch. Anything with edges."
+      },
+      {
+        "id": "02",
+        "name": "Profile",
+        "progress": 0.42,
+        "fadeIn": 0.32,
+        "fadeOut": 0.52,
+        "align": "end",
+        "kicker": "02 — The straps",
+        "heading": "This was supposed\nto be a backpack",
+        "body": "One word in the brief. Backpacker. What came out is a tactical harness with two heraldic crests that have never appeared on any backpack ever manufactured by anyone. And here’s the part that actually bothers me — it looks better. Five seconds of compute out-designed the brief. It stays. We never speak of this again."
+      },
+      {
+        "id": "03",
+        "name": "Works",
+        "progress": 0.64,
+        "fadeIn": 0.56,
+        "fadeOut": 0.74,
+        "align": "start",
+        "kicker": "03 — Unrequested prop",
+        "heading": "Nobody asked\nfor a gun",
+        "body": "It just showed up. I described a man in a suit and the machine decided he needed to be armed. Which — fine — is actually the pitch. This stop is a product slot. Swap the .glb, move one line of keyframe, and the camera orbits a perfume bottle with exactly the same reverence it’s currently giving a weapon nobody ordered."
+      },
+      {
+        "id": "04",
+        "name": "Contact",
+        "progress": 0.85,
+        "fadeIn": 0.79,
+        "fadeOut": 1.14,
+        "align": "end",
+        "kicker": "04 — Contact",
+        "heading": "Only the shoes\ncame out right",
+        "body": "Three hundred thousand polygons of disappointment, and then — shoes. Clean welt, correct specular, actual laces. If you own a product that genuinely exists, this gets embarrassingly good. Details below. Use them or don’t."
+      }
+    ]
+  }
+}
