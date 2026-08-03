@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from 'next/cache';
-import { DEFAULT_CONTENT } from '@/app/(public)/_content/copy';
+import { DEFAULT_CONTENT, contentForModel } from '@/app/(public)/_content/copy';
 import { api } from '@/convex/_generated/api';
 import {
   DEFAULT_KEYFRAMES,
@@ -94,12 +94,15 @@ export async function loadShowcase(): Promise<ShowcaseSource> {
     // Two sequential round-trips, and that is fine: this runs at build time and
     // once per cache expiry, not per request.
     const preset = await convex.query(api.presets.get, { modelId });
+    // Per model, so publishing a second .glb never inherits the first one's
+    // title, description and boot line.
+    const untuned = contentForModel(live);
     // An empty path would make sampleKeyframes throw inside the rAF callback,
     // which never re-arms. Both write paths reject it; this is the read-side belt.
     // A published model with no preset still renders — on the default camera
     // path, which is honest: the model is live, its shots are just untuned.
     if (!preset || preset.keyframes.length === 0) {
-      return live ? { ...DEFAULTS, modelUrl: live.url } : DEFAULTS;
+      return live ? { ...DEFAULTS, modelUrl: live.url, content: untuned } : DEFAULTS;
     }
 
     return {
@@ -111,7 +114,7 @@ export async function loadShowcase(): Promise<ShowcaseSource> {
       settings: preset.settings ?? DEFAULT_SCENE_SETTINGS,
       // Same rule for copy, and it covers presets saved before the studio could
       // edit words at all: those rows have no `content` and keep this site's.
-      content: preset.content ? withContentDefaults(preset.content) : DEFAULT_CONTENT,
+      content: preset.content ? withContentDefaults(preset.content) : untuned,
     };
   } catch {
     // A backend that is down, slow or misconfigured is not a reason to fail a

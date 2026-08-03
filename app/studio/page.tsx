@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { DEFAULT_CONTENT } from '@/app/(public)/_content/copy';
+import { DEFAULT_CONTENT, contentForModel } from '@/app/(public)/_content/copy';
 import { api } from '@/convex/_generated/api';
 import { getConvex } from '@/lib/convex-server';
 import {
@@ -111,10 +111,14 @@ async function loadStudio(model: string | undefined) {
     // works while the live site never changes.
     const modelId = pickModelId(models, model, live?.id);
     const saved = await convex.query(api.presets.get, { modelId });
+    // What a visitor would read if this model went live untouched — the editor
+    // opens on that, so the words follow the picker instead of every model
+    // opening on the first character's copy.
+    const untuned = contentForModel(models.find((entry) => entry.id === modelId));
     return {
       models,
       modelId,
-      preset: saved ? toPreset(saved) : FALLBACK_PRESET,
+      preset: saved ? toPreset(saved, untuned) : { ...FALLBACK_PRESET, content: untuned },
       liveModelId: live?.id ?? '',
     };
   } catch {
@@ -136,12 +140,15 @@ function pickModelId(
 }
 
 /** Convex stores marker positions as a plain array; the slice wants a fixed triple. */
-function toPreset(saved: {
-  keyframes: ShowcasePreset['keyframes'];
-  markers: { name: string; position: number[] }[];
-  settings?: ShowcasePreset['settings'];
-  content?: ShowcasePreset['content'];
-}): ShowcasePreset {
+function toPreset(
+  saved: {
+    keyframes: ShowcasePreset['keyframes'];
+    markers: { name: string; position: number[] }[];
+    settings?: ShowcasePreset['settings'];
+    content?: ShowcasePreset['content'];
+  },
+  untuned: ShowcasePreset['content'],
+): ShowcasePreset {
   return {
     keyframes: saved.keyframes,
     markers: toMarkers(saved.markers),
@@ -149,7 +156,7 @@ function toPreset(saved: {
     // A row saved before the studio could edit words has no copy at all; opening
     // it on an empty editor and saving would blank the live site. The same helper
     // the public page uses, so the editor shows exactly what a visitor gets.
-    content: saved.content ? withContentDefaults(saved.content) : DEFAULT_CONTENT,
+    content: saved.content ? withContentDefaults(saved.content) : untuned,
   };
 }
 

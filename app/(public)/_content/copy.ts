@@ -165,3 +165,30 @@ export const CONTENT_PRESETS: readonly ContentPreset[] = [
 
 /** What a deploy with no saved copy renders. */
 export const DEFAULT_CONTENT = KEANU;
+
+/** Keyed by the id `models.sync` assigns to the file, not by the preset ids above. */
+const BY_MODEL_ID: Readonly<Record<string, ShowcaseContent>> = {
+  hitman: KEANU,
+  'rahman-3d': RAHMAN,
+};
+
+/**
+ * The words a synced model starts with, before anyone opens /studio.
+ *
+ * Every .glb gets its own title, boot line and description: sharing one
+ * headline — one browser tab, one search result — across models reads as a bug,
+ * and used to happen to every file but the two written by hand. The panels stay
+ * the default ones, because they are timed to the camera path and a saved
+ * preset overrides all of this anyway.
+ */
+export function contentForModel(model?: { id: string; name: string } | null): ShowcaseContent {
+  if (!model) return DEFAULT_CONTENT;
+  const known = BY_MODEL_ID[model.id];
+  if (known) return known;
+
+  // 'models/vintage-car' -> 'VINTAGE CAR'; the id covers a name of separators.
+  const title =
+    (model.name.split('/').pop() ?? '').replace(/[-_]+/g, ' ').trim().toUpperCase() ||
+    model.id.replace(/-+/g, ' ').toUpperCase();
+  return { ...DEFAULT_CONTENT, title, bootTitle: title, description: `${title} — scroll-driven 3D showcase.` };
+}

@@ -6,7 +6,7 @@ import {
   DEFAULT_SCENE_SETTINGS,
 } from '@/slices/scroll-3d-showcase';
 import { ACTIVE_MODEL_ID, ACTIVE_MODEL_URL, withContentDefaults } from '@/lib/showcase-source';
-import { DEFAULT_CONTENT } from '@/app/(public)/_content/copy';
+import { DEFAULT_CONTENT, contentForModel } from '@/app/(public)/_content/copy';
 
 const probe = vi.hoisted(() => ({
   query: vi.fn(),
@@ -130,6 +130,38 @@ describe('loadShowcase with a backend', () => {
     const source = await load('https://example.convex.cloud');
     expect(source.modelUrl).toBe('/car.glb');
     expect(source.keyframes).toEqual(DEFAULT_KEYFRAMES);
+    // And on its own words: the tab, the search result and the boot screen
+    // used to read HITMAN for every model but the two written by hand.
+    expect(source.content.title).toBe('CAR');
+  });
+
+  it('gives a published model its own words when its preset has no copy', async () => {
+    answer({ id: 'car', name: 'car', url: '/car.glb', bytes: 10 }, SAVED_PRESET);
+
+    const source = await load('https://example.convex.cloud');
+    expect(source.content.title).toBe('CAR');
+    expect(source.content.description).not.toBe(DEFAULT_CONTENT.description);
+  });
+});
+
+describe('contentForModel', () => {
+  it('keeps the hand-written copy for a model that has some', () => {
+    expect(contentForModel({ id: 'hitman', name: 'hitman' })).toBe(DEFAULT_CONTENT);
+  });
+
+  it('names an unknown file after itself, not after the first character', () => {
+    const content = contentForModel({ id: 'models-vintage-car', name: 'models/vintage-car' });
+    expect(content.title).toBe('VINTAGE CAR');
+    expect(content.bootTitle).toBe('VINTAGE CAR');
+    expect(content.description).not.toBe(DEFAULT_CONTENT.description);
+  });
+
+  it('falls back to the id when the name is nothing but separators', () => {
+    expect(contentForModel({ id: 'a-b', name: '---' }).title).toBe('A B');
+  });
+
+  it('is the default copy when nothing is published', () => {
+    expect(contentForModel(null)).toBe(DEFAULT_CONTENT);
   });
 });
 
