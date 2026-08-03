@@ -171,6 +171,26 @@ Both env vars are optional and both fail closed — see `.env.example`. With
 neither set the site builds and renders exactly as it did before Convex existed,
 and `/studio` stays locked.
 
+## Two deployments, and which one you are looking at
+
+`npx convex dev` writes to a **dev** deployment and puts its URL in `.env.local`.
+The host runs against a **prod** one, whose URL is set in the host's own
+environment. They are separate databases with separate copies of every preset,
+so a model published or a preset seeded in one is invisible in the other. Every
+`convex` command here takes `--prod` for the second:
+
+```bash
+npx convex run seed:preset "$(cat seed/rahman-3d.json)"          # dev
+npx convex run --prod seed:preset "$(cat seed/rahman-3d.json)"   # what the site serves
+bunx convex deploy                                               # functions -> prod
+```
+
+And a write that goes straight to the database does **not** reach the page on
+its own: `/` is prerendered at build time and cached for a day. A save from
+/studio calls `updateTag` and refreshes it; a `convex run` from a terminal does
+not, so that one needs a redeploy — and a redeploy on an unchanged commit can
+reuse a cached Docker layer and rebuild nothing at all.
+
 ## Uploads
 
 Two routes in, and they trade different things:
