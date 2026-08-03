@@ -27,8 +27,9 @@ import type { ShowcaseContent } from '@/slices/scroll-3d-showcase';
 const RAHMAN: ShowcaseContent = {
   title: 'RAHMAN',
   // The boot screen is the one place that can say something the tab and the
-  // search result should not.
-  bootTitle: 'ini gue, versi tiga dimensi',
+  // search result should not — here it names the thing being demonstrated,
+  // while the wordmark, the tab and the search result stay RAHMAN.
+  bootTitle: 'SCROLL 3D SHOWCASE',
   brand: 'SELF PORTRAIT',
   description: 'Scroll-driven 3D showcase, built around a model of me.',
   sections: [

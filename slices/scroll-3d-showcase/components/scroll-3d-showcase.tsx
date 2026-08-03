@@ -171,6 +171,7 @@ export function Scroll3DShowcase({
       <BootOverlay
         status={status}
         loadFraction={loadFraction}
+        reducedMotion={reducedMotion}
         error={error}
         labels={mergedLabels}
         title={bootTitle || title}

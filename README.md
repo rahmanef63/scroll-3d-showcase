@@ -3,6 +3,10 @@
 Talent showcase site. A 3D model orbits 360° as you scroll, zooming into
 keyframed points of interest under a sci-fi HUD.
 
+**Live → [scroll-3d.rahmanef.com](https://scroll-3d.rahmanef.com)**
+
+![The scroll, captured frame by frame from the running scene](./public/preview.gif)
+
 Built to rr conventions: the feature is a vertical slice, the app is a thin host.
 
 ## Deploy your own
@@ -227,6 +231,24 @@ runs before anything appears and how early the model starts downloading.
   revalidate; hashed font files get a year, immutable.
 - **`optimizePackageImports: ['three']`** resolves named imports to the modules
   that define them rather than walking the package barrel.
+
+## Preview images
+
+`bun run capture` drives a headless Chromium down the real page — software
+rasteriser, because a WebGL canvas does not screenshot itself — and writes three
+files to `public/`:
+
+| File | Size | Used by |
+|---|---|---|
+| `og.jpg` | 1200×630 | the link preview card, wired in `generateMetadata` |
+| `preview.gif` | 900px, 24 frames | this README |
+| `thumb.webp` | 1600×840 | the template gallery |
+
+It waits on the boot overlay's `data-state="ready"` rather than a network idle,
+so nothing is shot while the canvas is still black, and it settles 850ms per
+frame because the camera is damped and arrives late. Re-run it whenever the
+model or the copy changes; a share card of the previous model is worse than
+none.
 
 Deliberately not enabled: the React Compiler. This tree writes to refs from a
 rAF loop 60×/s and hand-tunes what re-renders; automatic memoisation there is a

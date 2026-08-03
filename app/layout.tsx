@@ -30,6 +30,9 @@ const jetBrainsMono = localFont({
  * `copy.ts` and nowhere else.
  */
 export const metadata: Metadata = {
+  // Card images are declared as absolute paths; without this the crawler gets
+  // "/og.jpg" and has nothing to resolve it against.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scroll-3d.rahmanef.com'),
   title: DEFAULT_CONTENT.title,
   description: DEFAULT_CONTENT.description,
 };

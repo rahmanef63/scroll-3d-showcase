@@ -118,7 +118,7 @@
   },
   "content": {
     "title": "RAHMAN",
-    "bootTitle": "ini gue, versi tiga dimensi",
+    "bootTitle": "SCROLL 3D SHOWCASE",
     "brand": "SELF PORTRAIT",
     "description": "Scroll-driven 3D showcase, built around a model of me.",
     "sections": [
@@ -131,7 +131,7 @@
         "align": "start",
         "kicker": "Self portrait // the camera does the work",
         "heading": "RAH|MAN",
-        "body": "That is me, rendered. The glasses are right, the jacket is right, and the hair is doing something I have never once managed in real life. Scroll and the camera walks the model on its own, stopping on whatever is worth stopping on — that is the whole trick this page sells. Your product goes in this slot instead. A bottle, a sneaker, a watch. Anything with edges holds a close-up better than a face does."
+        "body": "That is me, rendered. The glasses are right, the jacket is right, and the hair is doing something I have never once managed in real life. Scroll and the camera walks the model on its own, stopping on whatever is worth stopping on \u2014 that is the whole trick this page sells. Your product goes in this slot instead. A bottle, a sneaker, a watch. Anything with edges holds a close-up better than a face does."
       },
       {
         "id": "r2",
@@ -140,9 +140,9 @@
         "fadeIn": 0.32,
         "fadeOut": 0.52,
         "align": "end",
-        "kicker": "r2 — The numbers",
+        "kicker": "r2 \u2014 The numbers",
         "heading": "Ten megabytes\nof me",
-        "body": "That is what came out of the exporter: 130 thousand triangles and three 4K texture atlases, which is a lot of file for one man standing still. Compressed down to a third without touching anything you can actually see. The version you just loaded is the small one — the big one is still on my disk, doing nothing."
+        "body": "That is what came out of the exporter: 130 thousand triangles and three 4K texture atlases, which is a lot of file for one man standing still. Compressed down to a third without touching anything you can actually see. The version you just loaded is the small one \u2014 the big one is still on my disk, doing nothing."
       },
       {
         "id": "r3",
@@ -151,7 +151,7 @@
         "fadeIn": 0.56,
         "fadeOut": 0.74,
         "align": "start",
-        "kicker": "r3 — The prop",
+        "kicker": "r3 \u2014 The prop",
         "heading": "I never asked\nfor a gun",
         "body": "It came with the model and I kept it, because it makes the point better than a pocket would: the camera can hold on one small object at any angle, and the object does not have to be a weapon. Swap the .glb, move one keyframe, and this stop orbits a perfume bottle with exactly the same seriousness."
       },
@@ -162,7 +162,7 @@
         "fadeIn": 0.79,
         "fadeOut": 1.14,
         "align": "end",
-        "kicker": "r4 — Contact",
+        "kicker": "r4 \u2014 Contact",
         "heading": "Now you know\nwhat I look like",
         "body": "Roughly. The polygons are generous around the jaw and I am not correcting them. Everything below is real and answers faster than the model does."
       }

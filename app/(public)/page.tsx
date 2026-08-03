@@ -5,16 +5,19 @@ import { SHOWCASE_TAG, loadShowcase } from '@/lib/showcase-source';
 import { SiteNav } from './_components/site-nav';
 import { TalentShowcase } from './_components/talent-showcase';
 
+/** Captured from the live scene; `metadataBase` in the layout makes it absolute. */
+const OG_IMAGE = '/og.jpg';
+
 /**
  * Title and description follow the saved copy, so renaming the site in /studio
  * renames the browser tab, the search result and the link preview together.
  * Cached like the page itself — nothing per-request is read, so the route stays
  * static.
  *
- * No image yet: the only art this site has is a WebGL scene, and a link card
- * with a real title beats one with a stale screenshot of a model that has since
- * been swapped. `summary` rather than `summary_large_image` for the same reason
- * — the large card reserves space for a picture that is not coming.
+ * The card image is a real frame of the running scene, shot by a headless
+ * browser (`bun run capture`) rather than drawn by hand. It goes stale the day
+ * the model or the copy changes, which is exactly when that command is worth
+ * re-running — a link preview of the previous model is worse than none.
  */
 export async function generateMetadata(): Promise<Metadata> {
   'use cache';
@@ -24,11 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const { content } = await loadShowcase();
   const { title, description } = content;
 
+  const images = [{ url: OG_IMAGE, width: 1200, height: 630, alt: `${title} — ${description}` }];
+
   return {
     title,
     description,
-    openGraph: { title, description, type: 'website', siteName: content.brand || title },
-    twitter: { card: 'summary', title, description },
+    openGraph: { title, description, type: 'website', siteName: content.brand || title, images },
+    twitter: { card: 'summary_large_image', title, description, images },
   };
 }
 

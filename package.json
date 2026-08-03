@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "audit:file-size": "node scripts/audit-file-size.mjs",
-    "validate": "bun run typecheck && bun run audit:file-size && bun run test"
+    "validate": "bun run typecheck && bun run audit:file-size && bun run test",
+    "capture": "node scripts/capture-preview.mjs"
   },
   "dependencies": {
     "@fontsource/chakra-petch": "^5.3.0",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "jsdom": "^30.0.1",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"

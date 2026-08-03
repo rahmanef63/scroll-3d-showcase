@@ -1,5 +1,6 @@
 'use client';
 
+import { useCountUp } from '../hooks/use-count-up';
 import type { HudLabels, ShowcaseError } from '../types';
 import type { EngineStatus } from '../hooks/use-showcase-engine';
 
@@ -9,6 +10,8 @@ export interface BootOverlayProps {
   error: ShowcaseError | null;
   labels: HudLabels;
   title: string;
+  /** Skips the count-up animation and shows the raw number. */
+  reducedMotion?: boolean;
 }
 
 /**
@@ -16,12 +19,22 @@ export interface BootOverlayProps {
  * page has nothing else to show — so the reason is rendered in place, mapped
  * from the error code to copy the consumer supplied.
  */
-export function BootOverlay({ status, loadFraction, error, labels, title }: BootOverlayProps) {
+export function BootOverlay({
+  status,
+  loadFraction,
+  error,
+  labels,
+  title,
+  reducedMotion,
+}: BootOverlayProps) {
+  // Everything on this screen reads off the eased value, not the raw one: a bar
+  // that glides while its number jumps looks like two different measurements.
+  const shown = useCountUp(loadFraction, reducedMotion);
   const stage =
     labels.bootStages[
-      Math.min(labels.bootStages.length - 1, Math.floor(loadFraction * labels.bootStages.length))
+      Math.min(labels.bootStages.length - 1, Math.floor(shown * labels.bootStages.length))
     ];
-  const percent = Math.round(loadFraction * 100);
+  const percent = Math.round(shown * 100);
   /** The transport has reported at least one byte, so a fraction means something. */
   const started = loadFraction > 0;
 
@@ -67,7 +80,7 @@ export function BootOverlay({ status, loadFraction, error, labels, title }: Boot
               style={started ? { width: `${percent}%` } : undefined}
               className={
                 started
-                  ? 'absolute inset-y-0 left-0 bg-showcase-primary shadow-[0_0_14px_var(--showcase-primary)] transition-[width] duration-200'
+                  ? 'absolute inset-y-0 left-0 bg-showcase-primary shadow-[0_0_14px_var(--showcase-primary)]'
                   : 'absolute inset-y-0 left-0 w-1/5 animate-[showcase-sweep_1.1s_ease-in-out_infinite] bg-showcase-primary shadow-[0_0_14px_var(--showcase-primary)] motion-reduce:animate-none'
               }
             />
