@@ -20,10 +20,11 @@ import {
  * section's id in the studio and its blocks stop appearing, which is the honest
  * outcome: they were authored for that stop.
  *
- * One object per character, on separate id ranges, so loading one preset in the
- * studio can never hand it the other one's numbers.
+ * One object per character set, on separate id ranges, so loading one preset in
+ * the studio can never hand it the other one's numbers. `r1`–`r4` are this
+ * site's own panels; `01`–`04` belong to the spare demo model.
  */
-const KEANU_EXTRAS: Record<string, ReactNode> = {
+const HITMAN_EXTRAS: Record<string, ReactNode> = {
   '01': (
     <ActionRow>
       <JumpButton to="02">Keep scrolling, genius</JumpButton>
@@ -151,7 +152,7 @@ const RAHMAN_EXTRAS: Record<string, ReactNode> = {
   ),
 };
 
-export const EXTRAS: Record<string, ReactNode> = { ...KEANU_EXTRAS, ...RAHMAN_EXTRAS };
+export const EXTRAS: Record<string, ReactNode> = { ...HITMAN_EXTRAS, ...RAHMAN_EXTRAS };
 
 /**
  * Which ids have blocks, for the studio to warn about drift.

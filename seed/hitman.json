@@ -118,9 +118,9 @@
   },
   "content": {
     "title": "HITMAN",
-    "bootTitle": "ini keanu wanna be",
-    "brand": "CONCEPT DEMO",
-    "description": "Scroll-driven 3D showcase. The model is AI-generated and it shows.",
+    "bootTitle": "sample model, bukan siapa-siapa",
+    "brand": "DEMO MODEL",
+    "description": "Sample model for the picker. Scroll-driven 3D showcase.",
     "sections": [
       {
         "id": "01",
@@ -129,9 +129,9 @@
         "fadeIn": -0.12,
         "fadeOut": 0.26,
         "align": "start",
-        "kicker": "Concept demo // nobody real signed off on this",
+        "kicker": "Demo asset // nobody real signed off on this",
         "heading": "HIT|MAN",
-        "body": "Okay, listen. This was supposed to be Keanu. The one with the dog and the pencil. I typed the brief, the generator thought about it for eleven seconds, and handed back — this. I’m not fixing it. You’re not here for the face anyway, you’re here because the camera does a thing when you scroll, and apparently that still impresses people. Put your own product in this slot. Sunglasses. A watch. Anything with edges."
+        "body": "A generated stand-in, kept around so this site ships with two models instead of one. Point the studio at it, publish it, tune a camera path on it, throw it away. It exists to be swapped out — which is the same thing your own product will do to it."
       },
       {
         "id": "02",
@@ -142,7 +142,7 @@
         "align": "end",
         "kicker": "02 — The straps",
         "heading": "This was supposed\nto be a backpack",
-        "body": "One word in the brief. Backpacker. What came out is a tactical harness with two heraldic crests that have never appeared on any backpack ever manufactured by anyone. And here’s the part that actually bothers me — it looks better. Five seconds of compute out-designed the brief. It stays. We never speak of this again."
+        "body": "One word in the brief. Backpacker. What came out is a tactical harness with two heraldic crests that have never appeared on any backpack ever manufactured by anyone. And here is the part that bothers me — it looks better. Five seconds of compute out-designed the brief."
       },
       {
         "id": "03",
@@ -153,7 +153,7 @@
         "align": "start",
         "kicker": "03 — Unrequested prop",
         "heading": "Nobody asked\nfor a gun",
-        "body": "It just showed up. I described a man in a suit and the machine decided he needed to be armed. Which — fine — is actually the pitch. This stop is a product slot. Swap the .glb, move one line of keyframe, and the camera orbits a perfume bottle with exactly the same reverence it’s currently giving a weapon nobody ordered."
+        "body": "It just showed up. A man in a suit was described and the machine decided he needed to be armed. Which — fine — is actually the pitch. This stop is a product slot. Swap the .glb, move one line of keyframe, and the camera orbits a perfume bottle with exactly the same reverence it is currently giving a weapon nobody ordered."
       },
       {
         "id": "04",
@@ -164,7 +164,7 @@
         "align": "end",
         "kicker": "04 — Contact",
         "heading": "Only the shoes\ncame out right",
-        "body": "Three hundred thousand polygons of disappointment, and then — shoes. Clean welt, correct specular, actual laces. If you own a product that genuinely exists, this gets embarrassingly good. Details below. Use them or don’t."
+        "body": "Three hundred thousand polygons of disappointment, and then — shoes. Clean welt, correct specular, actual laces. If you own a product that genuinely exists, this gets embarrassingly good. Details below. Use them or do not."
       }
     ]
   }

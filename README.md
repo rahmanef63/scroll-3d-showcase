@@ -85,7 +85,7 @@ the frame and every bar. Around the box:
 What each toolbar action does:
 
 - **SYNC** scans `public/` for `.glb`/`.gltf`, gives each new file an id derived
-  from its path (`hitman.glb` → `hitman`) and registers it. Ids are assigned once
+  from its path (`rahman-3d.glb` → `rahman-3d`) and registers it. Ids are assigned once
   and never reassigned, so a saved camera path stays attached to its model.
 - **GO LIVE** points `/` at the selected model. A model whose file has left
   `public/` reads `NO FILE` and cannot be published; if it was already live when
@@ -94,7 +94,9 @@ What each toolbar action does:
   left behind, so putting the file back gets the same id and its tuning with it. Syncing never changes what the
   site shows — dropping a file into `public/` must not silently swap the hero —
   so publishing is its own explicit act. Nothing published means the site serves
-  the bundled `rahman-3d.glb`, which is the state it ships in. A model published
+  the bundled `rahman-3d.glb`, which is the state it ships in. `hitman.glb`
+  rides along as a second asset with nothing riding on it, so the picker, GO
+  LIVE and IMPORT have something to swap to on a fresh clone. A model published
   before anyone has tuned it renders on the default camera path rather than
   quietly keeping the old one on screen.
 - Drag the canvas to orbit, wheel to dolly, tune any field, then **SAVE** — the
@@ -115,11 +117,13 @@ What each toolbar action does:
   npx convex run seed:preset --prod "$(cat seed/rahman-3d.json)"   # production
   ```
 
-  It refuses to overwrite a preset that already exists unless the file carries
-  `"force": true`, so re-running it can never eat a tuning session.
+  `seed/hitman.json` does the same for the demo asset. Seeding refuses to
+  overwrite a preset that already exists unless the file carries `"force":
+  true`, so re-running it can never eat a tuning session.
 - The **COPY** tab edits the words. A `CHARACTER` row at the top loads a whole
-  set in one click — this site ships two, `RAHMAN` and `KEANU`, each with its own
-  section ids so neither inherits the other's stat grid. Loading one is a single
+  set in one click — `RAHMAN`, which is this site, and `HITMAN`, the words for
+  the spare demo model. Separate section ids, so neither inherits the other's
+  stat grid. Loading one is a single
   undo step and does not change which model is live. Typing a title updates the HUD wordmark as
   you go; saving it renames the browser tab and the search result too, because
   `/`'s `generateMetadata` reads the same source. Panels can be added at the

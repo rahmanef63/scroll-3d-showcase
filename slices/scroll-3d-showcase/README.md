@@ -26,7 +26,7 @@ import { Scroll3DShowcase } from '@/slices/scroll-3d-showcase';
 
 <Scroll3DShowcase
   modelUrl="/model.glb"
-  title="HITMAN"
+  title="RAHMAN"
   sections={MY_SECTIONS}   // copy is yours; the slice ships none
 />;
 ```
