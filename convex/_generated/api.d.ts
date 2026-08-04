@@ -13,6 +13,7 @@ import type * as models from "../models.js";
 import type * as presets from "../presets.js";
 import type * as seed from "../seed.js";
 import type * as shape from "../shape.js";
+import type * as studio from "../studio.js";
 import type * as uploads from "../uploads.js";
 
 import type {
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   presets: typeof presets;
   seed: typeof seed;
   shape: typeof shape;
+  studio: typeof studio;
   uploads: typeof uploads;
 }>;
 

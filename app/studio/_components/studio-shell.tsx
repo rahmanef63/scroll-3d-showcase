@@ -10,7 +10,7 @@ import {
 } from '@/slices/scroll-3d-showcase/studio';
 import { CONTENT_PRESETS } from '../../(public)/_content/copy';
 import { BLOCK_IDS } from '../../(public)/_content/sections';
-import { OfflineNotice, reauthOnLock } from './studio-guards';
+import { DegradedNotice, reauthOnLock } from './studio-guards';
 
 interface StudioShellProps {
   models: ShowcaseModel[];
@@ -18,8 +18,8 @@ interface StudioShellProps {
   preset: ShowcasePreset;
   liveModelId: string;
   adapter: ShowcaseStudioAdapter;
-  /** '' when the backend answered. Anything else is shown as a standing notice. */
-  offline?: '' | 'unset' | 'unreachable';
+  /** '' when the editor can actually write. Anything else is a standing notice. */
+  degraded?: '' | 'unset' | 'unreachable' | 'token';
   /** Server actions for the two halves of an upload. Absent with no backend. */
   upload?: {
     createUrl: () => Promise<string>;
@@ -44,7 +44,7 @@ export function StudioShell({
   liveModelId,
   adapter,
   upload,
-  offline = '',
+  degraded = '',
 }: StudioShellProps) {
   const router = useRouter();
 
@@ -80,7 +80,7 @@ export function StudioShell({
 
   return (
     <>
-      {offline ? <OfflineNotice reason={offline} /> : null}
+      {degraded ? <DegradedNotice reason={degraded} /> : null}
       <ShowcaseStudio
         models={models}
         modelId={modelId}

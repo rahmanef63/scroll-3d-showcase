@@ -55,17 +55,21 @@ const REASONS = {
     head: 'BACKEND UNREACHABLE',
     body: 'The deployment did not answer, so this is the bundled model and the slice defaults rather than your rows. Nothing here can be saved until it does.',
   },
+  token: {
+    head: 'TOKEN MISMATCH',
+    body: 'STUDIO_TOKEN here is not the one the deployment accepts, so the editor opens and every write is refused. Set the same value in both — `npx convex env set STUDIO_TOKEN <value> --prod` — and reload.',
+  },
 } as const;
 
 /**
- * Says out loud that the editor is running on defaults.
+ * Says out loud that this editor cannot write.
  *
  * Without it a degraded studio is pixel-identical to a working one: the same
  * chrome, the same model, the same tabs — and the first sign of trouble is a
  * failed save after ten minutes of tuning. Sits above the chrome rather than in
  * the status slot because it is a standing condition, not an event.
  */
-export function OfflineNotice({ reason }: { reason: 'unset' | 'unreachable' }) {
+export function DegradedNotice({ reason }: { reason: 'unset' | 'unreachable' | 'token' }) {
   const { head, body } = REASONS[reason];
   return (
     <div

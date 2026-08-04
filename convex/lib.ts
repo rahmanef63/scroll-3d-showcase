@@ -3,6 +3,19 @@
  * STUDIO_TOKEN and pass it in, so the token never reaches the client bundle.
  * Reads stay public — only mutations call this.
  */
+/**
+ * Same comparison, as an answer rather than an exception.
+ *
+ * The studio asks this once when it opens: the host and this deployment hold
+ * separate copies of the token, and when they drift the editor still unlocks —
+ * the cookie is checked against the host's copy — while every write is refused
+ * here. That failure arrives as a 500 on SAVE, after the tuning.
+ */
+export function studioTokenMatches(token: string): boolean {
+  const expected = process.env.STUDIO_TOKEN;
+  return Boolean(expected) && constantTimeEqual(token, expected as string);
+}
+
 export function requireStudioToken(token: string): void {
   const expected = process.env.STUDIO_TOKEN;
   // Unset means the studio is disabled, not open.

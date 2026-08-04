@@ -39,12 +39,11 @@ export const metadata: Metadata = {
 type SearchParams = Promise<{ model?: string; e?: string }>;
 
 /**
- * Why the editor is looking at the bundled model instead of the backend's rows.
- * '' means it is not — anything else is shown as a standing notice, because a
- * studio that silently degrades looks identical to one that works until the
- * first save fails.
+ * Why the editor cannot be trusted to write. '' means it can — anything else is
+ * shown as a standing notice, because a studio that silently degrades looks
+ * identical to one that works until the first save fails.
  */
-type Offline = '' | 'unset' | 'unreachable';
+type Degraded = '' | 'unset' | 'unreachable' | 'token';
 
 /**
  * Bundled asset, so the studio opens even with zero env vars set. Id and URL
@@ -71,7 +70,7 @@ const FALLBACK = {
   modelId: FALLBACK_MODEL.id,
   preset: FALLBACK_PRESET,
   liveModelId: '',
-  offline: '' as Offline,
+  degraded: '' as Degraded,
 };
 
 /**
@@ -98,14 +97,14 @@ async function StudioGate({ searchParams }: { searchParams: SearchParams }) {
     );
   }
 
-  const { models, modelId, preset, liveModelId, offline } = await loadStudio(model);
+  const { models, modelId, preset, liveModelId, degraded } = await loadStudio(model);
   return (
     <StudioShell
       models={models}
       modelId={modelId}
       preset={preset}
       liveModelId={liveModelId}
-      offline={offline}
+      degraded={degraded}
       adapter={{
         syncModels,
         savePreset,
@@ -127,12 +126,17 @@ async function StudioGate({ searchParams }: { searchParams: SearchParams }) {
  */
 async function loadStudio(model: string | undefined) {
   const convex = getConvex();
-  if (!convex) return { ...FALLBACK, offline: 'unset' as Offline };
+  if (!convex) return { ...FALLBACK, degraded: 'unset' as Degraded };
 
   try {
-    const [models, live] = await Promise.all([
+    // Asked alongside the rows rather than on the first write: the host and the
+    // deployment hold separate copies of the token and nothing keeps them in
+    // step, so this is the one check that turns a 500 into a sentence.
+    const token = process.env.STUDIO_TOKEN ?? '';
+    const [models, live, accepted] = await Promise.all([
       convex.query(api.models.list, {}),
       convex.query(api.models.live, {}),
+      convex.query(api.studio.tokenAccepted, { token }),
     ]);
     if (models.length === 0) return FALLBACK;
 
@@ -150,12 +154,12 @@ async function loadStudio(model: string | undefined) {
       modelId,
       preset: saved ? toPreset(saved, untuned) : { ...FALLBACK_PRESET, content: untuned },
       liveModelId: live?.id ?? '',
-      offline: '' as Offline,
+      degraded: (accepted ? '' : 'token') as Degraded,
     };
   } catch {
     // Down, misconfigured or slow. Either way every write from here will fail,
     // and the editor should say so before someone tunes a path for ten minutes.
-    return { ...FALLBACK, offline: 'unreachable' as Offline };
+    return { ...FALLBACK, degraded: 'unreachable' as Degraded };
   }
 }
 
