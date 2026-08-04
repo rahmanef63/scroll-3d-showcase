@@ -110,23 +110,40 @@ describe('StudioLibrary', () => {
     expect(savePreset).toHaveBeenCalledWith('hitman', expect.objectContaining({ keyframes: expect.any(Array) }));
   });
 
-  it('offers DELETE only where the backend would allow it', () => {
+  it('offers DELETE on every row the backend would accept', () => {
     mount(adapterOf({ forgetModel: async () => {} }));
 
-    // Two rows can go: the upload and the row whose file already vanished.
-    expect(screen.getAllByRole('button', { name: 'DELETE' })).toHaveLength(2);
-    // The one still sitting in public/ gets the reason instead of a button that
-    // would undo itself on the next SYNC.
-    expect(screen.getAllByText(/DELETE THE FILE, THEN SYNC/)).toHaveLength(1);
+    // All three: the upload, the vanished file, and the one still in public/.
+    expect(screen.getAllByRole('button', { name: 'DELETE' })).toHaveLength(3);
   });
 
   it('asks once before deleting, because nothing else here does', () => {
     const forgetModel = vi.fn(async () => {});
     mount(adapterOf({ forgetModel }));
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'DELETE' })[0]);
+    // [1] is the upload; [0] is the live model, whose chip is disabled.
+    fireEvent.click(screen.getAllByRole('button', { name: 'DELETE' })[1]);
     expect(forgetModel).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'SURE?' })).toBeTruthy();
+  });
+
+  it('warns that deleting a scanned row only lasts until the next SYNC', () => {
+    // sync upserts by id, so the file in public/ re-creates the row. Learning
+    // that after the click is how a button loses trust — so the confirm says it.
+    mount(adapterOf({ forgetModel: vi.fn(async () => {}) }), { liveId: 'portrait' });
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'DELETE' })[0]);
+    expect(screen.getByRole('button', { name: 'BACK ON SYNC?' })).toBeTruthy();
+  });
+
+  it('refuses to delete the live model, whatever kind it is', () => {
+    const forgetModel = vi.fn(async () => {});
+    mount(adapterOf({ forgetModel }));
+
+    const live = screen.getAllByRole('button', { name: 'DELETE' })[0];
+    expect(live).toHaveProperty('disabled', true);
+    fireEvent.click(live);
+    expect(forgetModel).not.toHaveBeenCalled();
   });
 
   it('renames through the label, never through the id', async () => {

@@ -135,24 +135,26 @@ export function LibraryRow({
           </>
         ) : null}
 
-        {remove && deletable ? (
+        {remove ? (
           <Chip
             disabled={busy || liveBlocked}
             onClick={() => (armed ? remove(model.id) : setArmed(true))}
             title={
               liveBlocked
                 ? 'Publish another model before deleting the live one'
-                : 'Delete this row. Its saved preset stays behind.'
+                : deletable
+                  ? 'Delete this row. An uploaded file goes with it; the saved preset stays.'
+                  : 'Delete this row. The file stays in public/, so the next SYNC brings it back.'
             }
             // Pushed to the far end of the strip, away from SET: the two sat 4px
             // apart, and one is a delete.
             className={cn(TAP, 'ml-auto hover:text-showcase-accent')}
           >
-            {armed ? 'SURE?' : 'DELETE'}
+            {/* The second press says what it is about to be worth. Deleting a
+                scanned row is real but temporary — SYNC upserts by id — and
+                finding that out afterwards is how a button loses trust. */}
+            {armed ? (deletable ? 'SURE?' : 'BACK ON SYNC?') : 'DELETE'}
           </Chip>
-        ) : null}
-        {remove && !deletable ? (
-          <span className={cn(LABEL, 'shrink-0 opacity-70')}>IN public/ — DELETE THE FILE, THEN SYNC</span>
         ) : null}
       </div>
     </li>

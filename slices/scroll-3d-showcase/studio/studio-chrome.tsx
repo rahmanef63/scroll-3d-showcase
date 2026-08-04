@@ -36,6 +36,8 @@ export interface StudioChromeProps {
   /** Absent when the adapter cannot store files — no chip rather than a dead one. */
   onUpload?: () => void;
   onSave: () => void;
+  /** Throws away unsaved edits and re-reads the saved preset. */
+  onReset: () => void;
   onCopy: () => void;
   /** Downloads the draft as JSON. */
   onExport: () => void;
@@ -72,6 +74,7 @@ export function StudioChrome({
   onSync,
   onUpload,
   onSave,
+  onReset,
   onCopy,
   onExport,
   onImport,
@@ -116,6 +119,15 @@ export function StudioChrome({
       ) : null}
       <Chip disabled={busy || !dirty} onClick={onSave} title="Save preset (S)">
         SAVE
+      </Chip>
+      {/* SAVE's opposite, and only offered when there is something to throw
+          away. Undo covers the misclick, so it asks nothing first. */}
+      <Chip
+        disabled={busy || !dirty}
+        onClick={onReset}
+        title="Discard unsaved edits and go back to the saved preset (Z undoes it)"
+      >
+        RESET
       </Chip>
       <ChromeFiles busy={busy} onCopy={onCopy} onExport={onExport} onImport={onImport} />
 

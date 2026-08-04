@@ -62,12 +62,14 @@ export const setLive = mutation({
 });
 
 /**
- * Drops a row whose file is gone, for good.
+ * Drops a model row, and an uploaded model's bytes with it.
  *
- * Only a flagged row: deleting a live one would be a way to un-publish by
- * accident, and deleting a present one would let its id be reassigned to a
- * different file on the next scan. The **preset is left behind** on purpose —
- * if the same path ever comes back it gets the same id, and its tuning with it.
+ * Any row except the live one. For an upload this is the only way its file ever
+ * leaves storage. For a file still in public/ it is weaker than it looks: SYNC
+ * upserts by id, so the row returns on the next scan — the caller says so.
+ *
+ * The **preset is left behind** either way: ids come from the path, so a file
+ * that comes back gets its tuning with it. `presets.remove` is the broom.
  */
 export const forget = mutation({
   args: { token: v.string(), modelId: v.string() },
@@ -79,11 +81,9 @@ export const forget = mutation({
       .withIndex('by_modelId', (q) => q.eq('modelId', args.modelId))
       .unique();
     if (!row) throw new Error(`Unknown model: ${args.modelId.slice(0, 40)}`);
-    // An upload has no file in public/ to go missing, so this is the only way to
-    // delete one — and the only way its bytes ever leave storage.
-    if (!row.missing && !row.storageId) {
-      throw new Error('Only a model whose file is gone can be forgotten');
-    }
+    // The one refusal left. Deleting the row the public page is pointed at would
+    // drop the site to the bundled asset — a visible change nobody asked for
+    // while standing in a list of models.
     if (row.live && !row.missing) {
       throw new Error('Publish another model before deleting the live one');
     }

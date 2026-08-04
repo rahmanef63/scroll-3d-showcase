@@ -231,18 +231,36 @@ describe('publishing', () => {
     await expect(publish(db, 'ghost')).rejects.toThrow(/unknown model/i);
   });
 
-  it('forgets a flagged row, and only a flagged row', async () => {
+  it('forgets any row, including one whose file is still there', async () => {
     vi.stubEnv('STUDIO_TOKEN', TOKEN);
     const db = fakeDb();
     await call(db, [file('hitman.glb'), file('models/car.glb')]);
 
-    // Present: refusing here is what stops FORGET becoming a delete button.
-    await expect(runForget({ db } as unknown, { token: TOKEN, modelId: 'models-car' }))
-      .rejects.toThrow(/file is gone/i);
-
-    await call(db, [file('hitman.glb')]);
     await runForget({ db } as unknown, { token: TOKEN, modelId: 'models-car' });
     expect(db.rows.map((row) => row.modelId)).toEqual(['hitman']);
+  });
+
+  it('lets SYNC bring a deleted-but-present row straight back', async () => {
+    // The honest limit of deleting a scanned row, and why the confirm says so:
+    // sync upserts by id, so the file in public/ re-creates it on the next scan.
+    vi.stubEnv('STUDIO_TOKEN', TOKEN);
+    const db = fakeDb();
+    await call(db, [file('hitman.glb'), file('models/car.glb')]);
+    await runForget({ db } as unknown, { token: TOKEN, modelId: 'models-car' });
+
+    await call(db, [file('hitman.glb'), file('models/car.glb')]);
+    expect(db.rows.map((row) => row.modelId).sort()).toEqual(['hitman', 'models-car']);
+  });
+
+  it('refuses the live one — that would drop the site to the bundled asset', async () => {
+    vi.stubEnv('STUDIO_TOKEN', TOKEN);
+    const db = fakeDb();
+    await call(db, [file('hitman.glb'), file('models/car.glb')]);
+    await publish(db, 'models-car');
+
+    await expect(runForget({ db } as unknown, { token: TOKEN, modelId: 'models-car' }))
+      .rejects.toThrow(/publish another model/i);
+    expect(db.rows).toHaveLength(2);
   });
 
   it('lets a forgotten path come back with the same id', async () => {

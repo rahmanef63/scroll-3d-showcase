@@ -109,3 +109,54 @@ describe('useStudioHistory scope', () => {
     expect(result.current.canRedo).toBe(false);
   });
 });
+
+describe('useStudioHistory reset', () => {
+  it('throws away every edit and reports the draft clean', () => {
+    // SAVE's counterpart. Without it the only way out of a session that went
+    // wrong is a reload, which also loses which model was open.
+    const { result } = mount();
+
+    act(() => result.current.draft.patch({ azimuth: 90 }));
+    act(() => vi.advanceTimersByTime(400));
+    expect(result.current.draft.dirty).toBe(true);
+
+    act(() => result.current.reset());
+
+    expect(result.current.draft.keyframes[0].azimuth).toBe(0);
+    expect(result.current.draft.dirty).toBe(false);
+  });
+
+  it('leaves the discarded work one redo away', () => {
+    // Which is why it asks nothing first: the misclick is recoverable.
+    const { result } = mount();
+
+    act(() => result.current.draft.patch({ azimuth: 90 }));
+    act(() => vi.advanceTimersByTime(400));
+    act(() => result.current.reset());
+
+    expect(result.current.canRedo).toBe(true);
+    act(() => result.current.redo());
+    expect(result.current.draft.keyframes[0].azimuth).toBe(90);
+  });
+
+  it('does nothing to a draft that was never touched', () => {
+    const { result } = mount();
+    act(() => result.current.reset());
+
+    expect(result.current.draft.dirty).toBe(false);
+    expect(result.current.draft.keyframes.map((k) => k.label)).toEqual(['START', 'END']);
+  });
+
+  it('lands a drag still inside its window before rewinding past it', () => {
+    // Otherwise the pending commit fires after the reset and re-dirties the
+    // draft with the very edit that was just discarded.
+    const { result } = mount();
+
+    act(() => result.current.draft.patch({ azimuth: 45 }));
+    act(() => result.current.reset());
+    act(() => vi.advanceTimersByTime(400));
+
+    expect(result.current.draft.keyframes[0].azimuth).toBe(0);
+    expect(result.current.draft.dirty).toBe(false);
+  });
+});

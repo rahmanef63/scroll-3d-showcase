@@ -10,6 +10,16 @@ export interface StudioHistoryApi {
   canRedo: boolean;
   undo: () => void;
   redo: () => void;
+  /**
+   * Back to the preset this model was loaded with, and marked saved.
+   *
+   * Entry 0 already IS that preset — the seeding effect below records it before
+   * anything is edited — so SAVE's counterpart is a jump to the bottom of this
+   * stack rather than a second copy of the loaded state kept somewhere else.
+   * Redo still works afterwards: restoring moves the cursor, it does not throw
+   * the entries above away.
+   */
+  reset: () => void;
 }
 
 /** Deep enough for a long session, short enough to stay a few hundred KB. */
@@ -168,6 +178,13 @@ export function useStudioHistory(base: StudioDraft, resetKey: string): StudioHis
     redo: () => {
       flush();
       restore(stack.current.index + 1);
+    },
+    reset: () => {
+      flush();
+      restore(0);
+      // Last, because restoring marks the draft dirty and entry 0 is by
+      // definition exactly what the backend already has.
+      latest.current.markSaved();
     },
   };
 }

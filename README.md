@@ -98,6 +98,9 @@ the frame and every bar. Around the box:
 - **Chrome** across the top — model picker, `SYNC` / `SAVE` / `COPY TS` /
   `EXPORT` / `IMPORT` / `LIBRARY`, undo/redo, the unsaved dot, and the shortcut
   legend.
+- **RESET** beside SAVE is its counterpart — it throws away unsaved edits and
+  puts the last saved preset back. It asks nothing first because it goes through
+  the undo stack: `Z` brings the discarded work straight back.
 - **Rail** down the left — one row per keyframe (index, `p`, label). Clicking a
   row seeks to it; `+` captures the camera at the current scroll position.
 - **Panel** on the right — four tabs: **SHOT** (the selected keyframe, as
@@ -127,9 +130,12 @@ What each toolbar action does:
   and never reassigned, so a saved camera path stays attached to its model.
 - Every model row says where its bytes live — `PUBLIC/` for a file the scan
   found, `CLOUD` for an upload — in the picker and again in the library, because
-  that word decides what can be done to it. A `PUBLIC/` row cannot be deleted
-  from the studio: the file is in the build, so the next SYNC would put the row
-  straight back.
+  that word decides what deleting one is worth. A `CLOUD` row is gone for good
+  and its file leaves storage with it; a `PUBLIC/` row comes back on the next
+  SYNC, since the file is still in the build and `sync` upserts by id. The
+  confirm says which it is about to be — `SURE?` against `BACK ON SYNC?`. The
+  live model is the only row that cannot be deleted at all: publish another one
+  first, or the site drops to the bundled asset.
 - **Replacing a model under the same filename** is the one case `+0 NEW` reads
   like a failure. SYNC counts it separately (`+0 NEW / 1 REPLACED`), and the
   file's byte count rides along on its URL (`/rahman-3d.glb?v=1838500`) —

@@ -78,6 +78,7 @@ export function ShowcaseStudio({
   // Restoring a snapshot under a running rAF would fight it for the scroll.
   const undo = () => { playback.pause(); history.undo(); };
   const redo = () => { playback.pause(); history.redo(); };
+  const reset = () => { playback.pause(); history.reset(); };
 
   useStudioKeys({
     selectIndex: (index) => {
@@ -147,7 +148,8 @@ export function ShowcaseStudio({
         isLive={actions.liveId === modelId} missing={Boolean(model?.missing)}
         uploaded={Boolean(model?.uploaded)} onGoLive={actions.goLive} onForget={actions.forget}
         onSelectModel={onSelectModel} onUndo={undo} onRedo={redo}
-        onSync={actions.sync} onUpload={actions.upload} onSave={actions.save} onCopy={actions.copy}
+        onSync={actions.sync} onUpload={actions.upload} onSave={actions.save}
+        onReset={reset} onCopy={actions.copy}
         onExport={actions.exportJson} onImport={actions.importJson}
       />
 
