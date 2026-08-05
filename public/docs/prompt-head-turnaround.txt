@@ -1,0 +1,217 @@
+TASK:
+Create a consistent four-view head turnaround reference from the uploaded portrait image for AI-based 3D head reconstruction.
+
+OUTPUT:
+Generate exactly 4 separate image files.
+
+FILE 1 — FRONT VIEW:
+Perfectly centered front-facing head view.
+
+FILE 2 — LEFT PROFILE:
+Exact 90-degree left-side profile.
+
+FILE 3 — BACK VIEW:
+Exact rear view of the head and neck.
+
+FILE 4 — RIGHT PROFILE:
+Exact 90-degree right-side profile.
+
+IDENTITY PRESERVATION:
+Preserve the person’s real facial identity as accurately as possible.
+
+Maintain the same:
+
+- skull shape
+- forehead height and width
+- hairline
+- eyebrow shape
+- eye size and spacing
+- eyelid structure
+- nose shape and projection
+- cheek volume
+- ear shape and position
+- mouth width and lip shape
+- jawline
+- chin shape
+- facial hair pattern
+- skin tone
+- age
+- ethnicity
+- natural facial asymmetry
+
+Do not beautify, stylize, idealize, masculinize, feminize, age, or de-age the person.
+
+Do not reshape the face to match a generic model.
+
+ACCESSORY REMOVAL:
+Remove all glasses, sunglasses, masks, earrings, headphones, hats, and accessories that cover the face, ears, hair, head, or neck.
+
+When removing glasses:
+
+- reconstruct the natural eyes and eyelids
+- reconstruct the eyebrows
+- reconstruct the nose bridge
+- reconstruct the temples
+- remove lens distortion
+- remove reflections
+- remove frame shadows
+- do not leave marks or visual artifacts
+
+EXPRESSION:
+Use a neutral facial expression.
+
+Requirements:
+
+- mouth naturally closed
+- lips relaxed
+- no smile
+- no visible teeth
+- eyebrows relaxed
+- eyes open naturally
+- gaze straight ahead relative to each camera
+- jaw relaxed
+- no exaggerated emotion
+
+HEAD POSITION:
+Keep the head upright and anatomically neutral.
+
+Do not tilt, rotate, lean, raise, or lower the head.
+
+For side views, rotate the entire head exactly 90 degrees.
+
+Do not use a three-quarter angle.
+
+NECK AND CROP:
+Include the complete head, both ears where visible, full hair volume, and the entire neck down to the base of the neck.
+
+Include only a small amount of upper shoulder area when necessary.
+
+Do not crop:
+
+- top of hair
+- chin
+- ears
+- back of head
+- neck
+
+HAIR:
+Preserve the original hairstyle, hairline, volume, length, direction, parting, texture, and sideburns.
+
+The hairstyle must remain identical in all four views.
+
+Avoid floating hair, merged hair, missing hair, or inconsistent hair length.
+
+OUTFIT:
+Use a simple, plain, fitted crew-neck shirt or a simple collar that does not cover the neck anatomy.
+
+Use the same clothing in all views.
+
+Avoid:
+
+- high collars
+- hoodies
+- scarves
+- ties
+- necklaces
+- bulky fabric
+- shoulder accessories
+
+CAMERA:
+Use an orthographic-style camera or a long focal length between 85 mm and 120 mm.
+
+Minimize perspective distortion.
+
+Keep:
+
+- identical camera height
+- identical head scale
+- identical crop
+- identical distance
+- identical framing
+- identical image resolution
+
+The center of the camera should align approximately with the midpoint between the eyes and nose.
+
+LIGHTING:
+Use soft, neutral, even studio lighting.
+
+Requirements:
+
+- symmetrical illumination
+- minimal shadow
+- no dramatic rim light
+- no colored light
+- no harsh highlight
+- no deep shadow under the jaw
+- clearly visible skin and facial structure
+- clearly visible ear structure
+- clearly visible hair silhouette
+
+BACKGROUND:
+Use a seamless, uniform, light-gray or white background.
+
+No environment, texture, horizon line, props, gradient patterns, or background objects.
+
+IMAGE STYLE:
+Photorealistic high-resolution studio character reference.
+
+Natural skin texture.
+
+Accurate anatomy.
+
+Sharp but not artificially overprocessed.
+
+No cinematic grading.
+
+No depth-of-field blur.
+
+No beauty filter.
+
+No illustration, painting, anime, cartoon, sculpture, or 3D-rendered appearance.
+
+MULTI-VIEW CONSISTENCY:
+All four files must depict the exact same person at the exact same age and appearance.
+
+Do not change:
+
+- face proportions
+- hairstyle
+- hair length
+- skin tone
+- facial hair
+- ear position
+- eye shape
+- nose shape
+- jawline
+- neck thickness
+- clothing
+- lighting
+- camera height
+- image scale
+
+The only allowed difference between files is camera orientation around the subject.
+
+TECHNICAL COMPOSITION:
+Place the head at the same coordinates in every file.
+
+Keep the top of the hair and base of the neck at matching vertical positions.
+
+Use the same square or portrait aspect ratio for all four files.
+
+Recommended resolution:
+
+- 2048 × 2048 px, or
+- the highest available square resolution
+
+NEGATIVE PROMPT:
+glasses, sunglasses, eyewear, reflections, lens distortion, hat, headphones, jewelry, smiling, teeth, open mouth, tilted head, three-quarter view, perspective distortion, asymmetrical camera, different person, changed identity, beautified face, generic face, altered nose, altered jaw, altered ears, inconsistent hairstyle, inconsistent facial hair, cropped hair, cropped chin, cropped neck, dramatic shadows, cinematic lighting, colored lighting, blurry image, depth of field, fisheye lens, wide-angle distortion, illustration, anime, cartoon, painterly image, waxy skin, plastic skin, excessive skin smoothing, duplicated features, malformed ears, deformed eyes, mismatched profiles, text, watermark, collage, contact sheet
+
+DELIVERY RULE:
+Return four separate files, not one combined sheet.
+
+Use clear filenames:
+
+01_head_front.png
+02_head_left.png
+03_head_back.png
+04_head_right.png

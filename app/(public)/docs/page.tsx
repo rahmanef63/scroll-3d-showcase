@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { MODEL_STEPS, REPO_URL, STEPS, type DocStep } from './_steps';
+import { MODEL_STEPS } from './_model-steps';
+import { REPO_URL, STEPS, type DocStep } from './_steps';
 
 export const metadata: Metadata = {
   title: 'Guide — build one with your own model',
@@ -45,7 +46,7 @@ export default function DocsPage() {
       <Part
         kicker="Part one"
         title="Make the model"
-        lead="From a handful of generated images to a .glb small enough to ship. Every tool here is somebody else's; swap any of them for one you prefer."
+        lead="Nine steps from one photo to a .glb small enough to ship — with the two prompts I actually used and the real reference set behind the model on this page, mistakes included. Every tool here is somebody else's; swap any of them for one you prefer."
         steps={MODEL_STEPS}
       />
 

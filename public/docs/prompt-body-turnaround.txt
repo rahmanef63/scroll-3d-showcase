@@ -1,0 +1,316 @@
+TASK:
+Create a consistent four-view full-body character turnaround from the uploaded reference images for AI-based 3D character reconstruction, skeleton detection, rigging, and texture generation.
+
+OUTPUT:
+Generate exactly 4 separate image files.
+
+FILE 1 — FRONT VIEW:
+Exact front-facing full-body view.
+
+FILE 2 — LEFT VIEW:
+Exact 90-degree left-side full-body profile.
+
+FILE 3 — BACK VIEW:
+Exact rear full-body view.
+
+FILE 4 — RIGHT VIEW:
+Exact 90-degree right-side full-body profile.
+
+IDENTITY AND BODY PRESERVATION:
+Preserve the person’s recognizable identity and natural body proportions.
+
+Maintain the same:
+
+- head size
+- neck length and thickness
+- shoulder width
+- chest depth
+- torso length
+- waist width
+- hip width
+- arm length
+- hand size
+- leg length
+- thigh and calf volume
+- foot size
+- natural body weight
+- apparent height
+- posture
+- age
+- skin tone
+- hairstyle
+- facial structure
+
+Do not make the body taller, shorter, thinner, wider, more muscular, more athletic, or more idealized unless explicitly requested.
+
+Do not use fashion-model proportions.
+
+Do not enlarge the head or shorten the legs.
+
+ACCESSORY REMOVAL FROM FACE:
+Remove glasses, sunglasses, masks, hats, headphones, and facial accessories.
+
+Reconstruct all facial areas naturally after removing glasses.
+
+Do not leave reflections, frame shadows, distorted eyes, or marks around the nose and temples.
+
+A-POSE:
+Place the character in a clean, symmetrical A-pose suitable for automatic skeleton detection.
+
+Pose requirements:
+
+- body upright
+- spine straight and neutral
+- head upright
+- head facing the same direction as the torso
+- shoulders level
+- arms extended diagonally downward approximately 25–35 degrees away from the torso
+- clear visible gap between upper arms and torso
+- clear visible gap between forearms and hips
+- elbows nearly straight but naturally relaxed
+- wrists straight
+- palms facing inward toward the thighs
+- fingers naturally extended and slightly separated
+- thumbs clearly visible
+- legs straight
+- feet placed approximately shoulder-width apart
+- knees facing forward relative to the body
+- feet parallel or only slightly rotated outward
+- body weight distributed evenly
+- no contrapposto
+- no bent knee
+- no crossed legs
+- no hand touching the body
+- no hand placed inside pockets
+- no object blocking the limbs
+
+The silhouette of both arms, hands, legs, and feet must remain clearly separated and readable.
+
+SIDE-VIEW POSE:
+For left and right views, rotate the entire character exactly 90 degrees.
+
+Keep both arms in the same A-pose.
+
+Do not move the rear arm behind the torso.
+
+Slightly offset the two arms only when anatomically necessary so both arm silhouettes remain readable.
+
+Do not change the pose between views.
+
+BACK-VIEW POSE:
+Preserve the same shoulder level, arm angle, hand position, leg spacing, and foot direction as the front view.
+
+OUTFIT:
+Use a clean, fitted outfit that accurately follows the body without hiding anatomical landmarks.
+
+Recommended generic outfit:
+
+- fitted long-sleeve shirt, fitted jacket, or fitted suit jacket
+- fitted trousers
+- simple low-profile shoes
+
+The outfit must remain identical in every view.
+
+Clothing requirements:
+
+- realistic fabric construction
+- consistent seams
+- consistent buttons
+- consistent pockets
+- consistent collar
+- consistent cuffs
+- consistent trouser length
+- consistent shoe design
+- no floating fabric
+- no clipping
+- no merged layers
+- no excessive wrinkles
+- no long coat
+- no cape
+- no oversized hoodie
+- no wide skirt
+- no loose fabric covering the knees
+- no clothing blocking the wrist, hands, ankles, or shoes
+
+OPTIONAL BACKPACK OR EQUIPMENT:
+Only include a backpack or wearable object when it is present in the reference or explicitly requested.
+
+When a backpack is included:
+
+- preserve the same backpack design in all four views
+- maintain realistic width, height, and depth
+- attach it naturally to the back
+- keep both shoulder straps correctly positioned
+- make the side thickness clearly visible in side views
+- keep the backpack centered in the rear view
+- preserve all pockets, straps, buckles, seams, handles, and closures
+- do not flatten the backpack
+- do not rotate its front surface toward the side camera
+- do not merge the backpack with the torso
+- do not allow straps to float
+- do not allow the bag to intersect the arms
+- do not change the bag size between views
+
+For strict skeleton extraction, prefer generating an additional version without a backpack because backpacks can obscure the spine and shoulder silhouette.
+
+OPTIONAL HANDHELD PROP:
+Avoid handheld props for the primary rigging reference.
+
+Props can alter finger detection and arm reconstruction.
+
+When a prop is explicitly required:
+
+- use the exact same hand in every view
+- keep it pointed safely downward
+- maintain identical dimensions
+- preserve the same grip
+- keep the wrist neutral
+- prevent the prop from intersecting the leg
+- ensure the opposite hand remains empty
+- create an additional clean no-prop version for skeleton extraction
+
+FACE:
+Use a neutral facial expression.
+
+Requirements:
+
+- mouth closed
+- no visible teeth
+- eyes naturally open
+- eyebrows relaxed
+- no smile
+- no facial tension
+- no glasses
+
+CAMERA:
+Use a true orthographic-style camera whenever available.
+
+Otherwise, use a long focal length between 100 mm and 200 mm from a sufficient distance.
+
+Camera requirements:
+
+- no perspective distortion
+- no wide-angle lens
+- no fisheye
+- camera centered on the body
+- camera height around pelvis or lower torso level
+- vertical camera axis
+- no camera tilt
+- no high angle
+- no low angle
+- identical distance in all views
+- identical character scale in all views
+- identical crop in all views
+
+The body must occupy approximately 85–90% of the frame height.
+
+Leave equal safe margins above the hair and below the shoes.
+
+LIGHTING:
+Use soft, even, neutral studio lighting.
+
+Requirements:
+
+- full-body visibility
+- minimal cast shadow
+- no dramatic lighting
+- no strong rim light
+- no colored light
+- no deep black areas
+- visible separation between black clothing layers
+- visible seams and silhouette
+- balanced lighting from left and right
+
+For dark outfits, slightly raise exposure so the jacket, shirt, trousers, straps, and accessories remain visually distinguishable.
+
+BACKGROUND:
+Use a seamless, uniform light-gray or white background.
+
+No environment, furniture, floor texture, props, scenery, gradient patterns, or visual clutter.
+
+A very soft contact shadow under the shoes is acceptable.
+
+IMAGE STYLE:
+Photorealistic high-resolution studio character reference.
+
+Accurate human anatomy.
+
+Realistic fabric and material response.
+
+No stylization.
+
+No cinematic grading.
+
+No depth-of-field blur.
+
+No motion blur.
+
+No illustration, anime, cartoon, concept art, sculpture, mannequin, or obvious CGI appearance.
+
+MULTI-VIEW CONSISTENCY:
+All four images must depict the exact same person and exact same model.
+
+Maintain identical:
+
+- facial identity
+- hairstyle
+- skin tone
+- body dimensions
+- apparent height
+- head-to-body ratio
+- clothing
+- accessories
+- backpack
+- footwear
+- arm angle
+- hand posture
+- finger count
+- leg spacing
+- lighting
+- camera height
+- image scale
+
+The only permitted change is the camera rotation around the stationary character.
+
+GEOMETRIC ALIGNMENT:
+Align all views using the same floor level.
+
+Match these landmarks across files:
+
+- top of head
+- eye height
+- shoulder height
+- elbow height
+- wrist height
+- pelvis height
+- knee height
+- ankle height
+- shoe sole level
+
+Do not vertically stretch or compress individual views.
+
+TECHNICAL OUTPUT:
+Generate each view as a separate portrait-oriented image.
+
+Recommended aspect ratio:
+
+2:3 or 3:4
+
+Recommended resolution:
+
+2048 × 3072 px or higher
+
+The full body must remain completely inside the frame.
+
+NEGATIVE PROMPT:
+glasses, sunglasses, eyewear, hat, headphones, mask, hand in pocket, arms touching torso, arms hidden behind body, crossed arms, T-pose, bent elbows, bent knees, crossed legs, uneven shoulders, leaning body, contrapposto, walking pose, action pose, rotated torso, tilted head, three-quarter view, perspective view, wide-angle distortion, fisheye distortion, cropped head, cropped shoes, cropped hands, missing fingers, extra fingers, fused fingers, deformed hands, missing limbs, extra limbs, asymmetrical pose, inconsistent body proportions, different character, different outfit, different hairstyle, changed height, oversized head, short legs, elongated torso, floating straps, malformed backpack, flattened backpack, front-facing backpack in side view, backpack intersecting body, bag changing size, clothing clipping, prop disappearing, prop changing hands, dramatic shadows, black clothing losing detail, cinematic lighting, colored light, blurred image, depth of field, illustration, anime, cartoon, concept art, mannequin, text, logo, watermark, collage, contact sheet
+
+DELIVERY RULE:
+Return four separate files, not a single turnaround sheet.
+
+Use clear filenames:
+
+01_body_front.png
+02_body_left.png
+03_body_back.png
+04_body_right.png

@@ -291,10 +291,20 @@ generator export with room to spare, and a compressed one is a third of that.
 ## Docs
 
 `/docs` is the same story written for someone else's model, in two parts: making
-the model (reference sheet → image-to-3D → Blender over MCP → a shipping-size
-`.glb`) and making the site (clone, wire the two env vars, tune, publish). It is a
-static page with no data behind it. The do/don't reference art in part one is a
-placeholder pair under `public/docs/` — swap the files, no code change. Both routes reach it — the showcase carries a `DOCS` / `STUDIO`
+the model (source photo → head and body turnarounds → image-to-3D → Blender over
+MCP → a shipping-size `.glb`) and making the site (clone, wire the two env vars,
+tune, publish). It is a static page with no data behind it, and the two halves
+are two files — `_model-steps.ts` and `_steps.ts` — because they fail
+differently.
+
+Part one carries the real set behind the model on this site rather than drawn
+placeholders: the source photo with the glasses still on, the pass that removed
+them, the A-pose views that worked and the side view that did not. The art is
+downscaled webp under `public/docs/` (~130 KB for nine images) and the two
+turnaround prompts sit beside it as plain `.txt`, linked from the steps that use
+them — swap any of it, no code change. The originals live under
+`public/progress/`, which is gitignored for the same reason `legacy-static/` is:
+14 MB of PNG that the site never serves. Both routes reach the guide — the showcase carries a `DOCS` / `STUDIO`
 pair in the bottom right, and the studio's lock screen points anyone who lands on
 it at the repo and the guide rather than at a password they do not have.
 

@@ -34,7 +34,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: '/(.*\\.(?:glb|gltf))', headers: [{ key: 'Cache-Control', value: ASSET }] },
-      { source: '/docs/(.*\\.webp)', headers: [{ key: 'Cache-Control', value: ASSET }] },
+      // Reference art and the two prompt .txt files the guide links to.
+      { source: '/docs/(.*)', headers: [{ key: 'Cache-Control', value: ASSET }] },
       // three's Draco decoder, vendored under public/draco/. Not `immutable`:
       // the filenames are stable across three releases, so the bytes behind them
       // change on an upgrade.

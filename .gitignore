@@ -44,6 +44,10 @@ next-env.d.ts
 # legacy static build + master asset (18 MB glb) — kept on disk, not in git
 /legacy-static/
 
+# full-size reference shots the /docs guide was built from (14 MB of PNG).
+# The webp derivatives it actually serves are committed under public/docs/.
+/public/progress/
+
 # convex/_generated is COMMITTED on purpose (self-hosted deploy): the Docker
 # build typechecks without running codegen inside the container. Do not ignore it.
 
