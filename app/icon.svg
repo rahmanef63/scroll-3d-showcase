@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- The studio's PATH map, shrunk to a tab: the model at the centre, the orbit
+       around it, and the camera somewhere on it. Colours are the theme tokens
+       written out, because an icon is served without the stylesheet. -->
+  <rect width="32" height="32" fill="#04060c"/>
+  <circle cx="16" cy="16" r="12.5" fill="none" stroke="#4fe3ff" stroke-opacity="0.45" stroke-width="1.6"/>
+  <circle cx="16" cy="16" r="6.25" fill="none" stroke="#4fe3ff" stroke-opacity="0.22" stroke-width="1.2"/>
+  <line x1="16" y1="16" x2="24.8" y2="7.2" stroke="#4fe3ff" stroke-opacity="0.7" stroke-width="1.6"/>
+  <circle cx="16" cy="16" r="2" fill="#8296ae"/>
+  <circle cx="24.8" cy="7.2" r="4" fill="#4fe3ff"/>
+</svg>

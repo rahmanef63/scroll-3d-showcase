@@ -57,6 +57,7 @@ app/
     _content/                   copy.ts (the words) + sections.tsx (the rich blocks)
   studio/                       the one dynamic route — camera editor, token-gated
   fonts/                        self-hosted Chakra Petch + JetBrains Mono
+  icon.svg  favicon.ico         the studio's PATH map, shrunk to a tab
   globals.css                   theme tokens (CSS and WebGL read the same values)
 components/ui/                  vendored shadcn primitives
 convex/                         models + presets tables, 3 queries, 4 mutations, 1 seed
@@ -299,12 +300,13 @@ differently.
 
 Part one carries the real set behind the model on this site rather than drawn
 placeholders: the source photo with the glasses still on, the pass that removed
-them, the A-pose views that worked and the side view that did not. The art is
-downscaled webp under `public/docs/` (~130 KB for nine images) and the two
-turnaround prompts sit beside it as plain `.txt`, linked from the steps that use
-them — swap any of it, no code change. The originals live under
-`public/progress/`, which is gitignored for the same reason `legacy-static/` is:
-14 MB of PNG that the site never serves. Both routes reach the guide — the showcase carries a `DOCS` / `STUDIO`
+them, the head that came back with the frames fused into the skull, the A-pose
+views that worked, the side view that did not, and both generator results — the
+head that carries the likeness and the body that lost it. The art is downscaled
+webp under `public/docs/` (~180 KB for twelve images) and the two turnaround
+prompts sit beside it as plain `.txt`, linked from the steps that use them —
+swap any of it, no code change. Full-size sources stay under `public/progress/`,
+gitignored for the same reason `legacy-static/` is: the site never serves them. Both routes reach the guide — the showcase carries a `DOCS` / `STUDIO`
 pair in the bottom right, and the studio's lock screen points anyone who lands on
 it at the repo and the guide rather than at a password they do not have.
 

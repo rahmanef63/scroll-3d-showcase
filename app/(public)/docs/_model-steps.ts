@@ -26,6 +26,11 @@ export const MODEL_STEPS: readonly DocStep[] = [
         alt: 'Chat screenshot: the same portrait sent to an image model, returned without glasses',
         caption: 'Do — one line: “lepas kacamatanya”, take the glasses off',
       },
+      {
+        src: '/docs/mesh-glasses-fused.webp',
+        alt: 'A generated 3D head with the glasses fused into the face as solid geometry',
+        caption: 'Why — skip it and the frames come back as skull',
+      },
     ],
   },
   {
@@ -108,12 +113,24 @@ export const MODEL_STEPS: readonly DocStep[] = [
   {
     n: '06',
     title: 'Turn the references into a mesh',
-    body: 'Upload the sheet to an image-to-3D service. I use Meshy: open the workspace, switch the Multiview toggle on, and add your views one at a time rather than dropping the whole set in at once. Generate, inspect the preview from every side, and download the result — GLB by default, or .blend if you already know you will keep editing. Run the head and the body as separate generations; one pass rarely resolves both at a quality worth keeping.',
+    body: 'Upload the sheet to an image-to-3D service. I use Meshy: open the workspace, switch the Multiview toggle on, and add your views one at a time rather than dropping the whole set in at once. Generate, inspect the preview from every side, and download the result — GLB by default, or .blend if you already know you will keep editing. Run the head and the body as separate generations, and expect the body pass to lose the face: it spends its resolution on a whole person, so the head comes back as a generic one. That is not a failed run. The head pass is where the likeness lives, the body pass is where the silhouette lives, and step 08 joins them.',
     links: [
       {
         label: 'meshy.ai',
         href: 'https://www.meshy.ai?via=rahman',
         note: 'affiliate link — costs you nothing, supports this',
+      },
+    ],
+    images: [
+      {
+        src: '/docs/mesh-head-result.webp',
+        alt: 'Meshy workspace showing the generated head, 940,544 faces',
+        caption: 'Head pass — the likeness, at 940k faces',
+      },
+      {
+        src: '/docs/mesh-body-result.webp',
+        alt: 'Meshy preview of the generated full body with a generic face',
+        caption: 'Body pass — 1.98M faces, and a face that is not mine',
       },
     ],
   },
